@@ -35,6 +35,6 @@ Cargarla una APP endpoint **/api/Apps/Register** (Si no hay APPs cargadas o no e
 Durante la llamada a **/api/Authentication/VerificationKey** no se guarda registro de las autenticaciones exitosas pero si de las fallidas.
 
 
-### Libreria para facilitar autenticación mediante el presente servicio. [Ver documentación](https://devs.fepba.gov.ar/tfs/Perifericos/APIKEY/_git/APIKEY_Libreria?path=%2FREADME.md&version=GBmaster&_a=preview)
+### Libreria para facilitar autenticación mediante el presente servicio. [Ver documentación](https://github.com/patricioarena/ApiKeyLibreria)
 
     Happy encoding :)
