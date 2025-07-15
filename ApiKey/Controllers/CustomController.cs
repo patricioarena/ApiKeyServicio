@@ -12,9 +12,9 @@ namespace ApiKeyPOC.Controllers
 #if DEBUG
     [AllowAnonymous]
 #else
+    [Authorize(AuthenticationSchemes = IISDefaults.AuthenticationScheme)]
 #endif
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes = IISDefaults.AuthenticationScheme)]
     public class CustomController : Controller
     {
         public CustomController() { }
@@ -38,6 +38,9 @@ namespace ApiKeyPOC.Controllers
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
         public Tout ImpersontedControllerAction<Tout>(Func< Tout> serviceMethod)
         {
+            if (IsDebugWithDocker())
+                return serviceMethod();
+            
             Tout result = default(Tout);
             var callerIdentity = User.Identity as WindowsIdentity;
             WindowsIdentity.RunImpersonated(callerIdentity.AccessToken, () =>
@@ -51,6 +54,9 @@ namespace ApiKeyPOC.Controllers
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
         public Tout ImpersontedControllerAction<Tin, Tout>(Func<Tin, Tout> serviceMethod, Tin param1)
         {
+            if (IsDebugWithDocker())
+                return serviceMethod(param1);
+
             Tout result = default(Tout);
             var callerIdentity = User.Identity as WindowsIdentity;
             WindowsIdentity.RunImpersonated(callerIdentity.AccessToken, () =>
@@ -64,6 +70,9 @@ namespace ApiKeyPOC.Controllers
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
         public Tout ImpersontedControllerAction<Tin, Tin2, Tout>(Func<Tin, Tin2, Tout> serviceMethod, Tin param1, Tin2 param2)
         {
+            if (IsDebugWithDocker())
+                return serviceMethod(param1, param2);
+
             Tout result = default(Tout);
             var callerIdentity = User.Identity as WindowsIdentity;
             WindowsIdentity.RunImpersonated(callerIdentity.AccessToken, () =>
@@ -77,8 +86,17 @@ namespace ApiKeyPOC.Controllers
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
         public string ImpersontedUser()
         {
+            if (IsDebugWithDocker())
+                return "Some developer in debug";
+
             var callerIdentity = User.Identity as WindowsIdentity;
             return callerIdentity.Name;
+        }
+        
+        private static bool IsDebugWithDocker()
+        {
+            return Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" 
+                   && Environment.GetEnvironmentVariable("DOCKER_ENVIRONMENT") == "true";
         }
     }
 }

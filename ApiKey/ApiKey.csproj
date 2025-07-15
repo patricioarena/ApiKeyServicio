@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 		<UserSecretsId>eb9b6d69-18de-4422-ada0-631b0dd55e76</UserSecretsId>
-		<Configurations>Debug;Release;Testing;Testing2</Configurations>
+		<Configurations>Debug;Release;Testing</Configurations>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -31,13 +31,13 @@
 		<Folder Include="wwwroot\" />
 	</ItemGroup>
 	
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Exec Command="copy /Y &quot;$(SolutionDir)\ApiKey\web.$(Configuration).config&quot; &quot;$(SolutionDir)\ApiKey\web.config" />
-	</Target>
+<!--	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">-->
+<!--		<Exec Command="copy /Y &quot;$(SolutionDir)\ApiKey\web.$(Configuration).config&quot; &quot;$(SolutionDir)\ApiKey\web.config" />-->
+<!--	</Target>-->
 
 	<ItemGroup>
-		<Content Update="web.Debug.config" CopyToPublishDirectory="Never" />
-		<Content Update="appsettings.Debug.json" CopyToPublishDirectory="Never" />
+		<Content Update="web.Development.config" CopyToPublishDirectory="Never" />
+		<Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
 		<!--<Content Update="appsettings.Release.json" CopyToPublishDirectory="Never" />-->
 		<!--<Content Update="appsettings.Testing.json" CopyToPublishDirectory="Never" />-->
 		<!--<Content Update="appsettings.UAT.json" CopyToPublishDirectory="Never" />-->

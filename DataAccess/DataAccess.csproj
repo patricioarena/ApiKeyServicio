@@ -2,14 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <Configurations>Debug;Release;Testing;Testing2</Configurations>
+    <Configurations>Debug;Release;Testing</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Testing2|AnyCPU'">
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 

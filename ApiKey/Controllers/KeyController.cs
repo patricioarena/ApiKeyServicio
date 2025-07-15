@@ -23,8 +23,8 @@ namespace ApiKeyPOC.Controllers
 #if DEBUG
     [AllowAnonymous]
 #else
-#endif
     [Authorize(AuthenticationSchemes = IISDefaults.AuthenticationScheme)]
+#endif
     [Route("api/[controller]")]
     public class KeyController : CustomController
     {

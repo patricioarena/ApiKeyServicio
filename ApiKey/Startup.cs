@@ -1,3 +1,4 @@
+using System;
 using Application;
 using Application.Factory;
 using Application.IFactory;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
@@ -51,30 +53,28 @@ namespace ApiKeyPOC
 
             services.AddScoped<IAbstractServiceFactory, ConcreteServiceFactory>();
 
-            services.AddDbContext<ApiKeyDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("SQLServer")));
+            services.AddDbContext<ApiKeyDbContext>(OptionsAction());
 
-#pragma warning disable ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
             var serviceProvider = services.BuildServiceProvider();
-#pragma warning restore ASP0000 // Do not call 'IServiceCollection.BuildServiceProvider' in 'ConfigureServices'
-
             var logger = serviceProvider.GetService<ILogger<Startup>>();
+            
             services.AddSingleton(typeof(ILogger), logger);
-
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IConfiguration>(Configuration);
-            services.AddMvc().AddNewtonsoftJson(
-                options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-                );
+            services.AddMvc().AddNewtonsoftJson(options => 
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-            MapperConfiguration mapperConfiguration = new AutoMapper.MapperConfiguration(config =>
+            MapperConfiguration mapperConfiguration = new MapperConfiguration(config =>
             {
                 config.AddProfile(new AutoMapperProfileConfiguration("default"));
             });
 
             IMapper mapper = mapperConfiguration.CreateMapper();
 
+            string ConnectionString = IsDebugWithDocker()
+                ? Configuration.GetConnectionString("SQLServerDocker")
+                : Configuration.GetConnectionString("SQLServer");
 
-            string ConnectionString = Configuration.GetConnectionString("SQLServer");
             string[] arr = ConnectionString.Split(';');
 
             string Server = arr[0].Split('=')[1];
@@ -90,17 +90,30 @@ namespace ApiKeyPOC
                         Version = "v1",
                         Title = Configuration.GetSection("SwaggerOptions:Description").Value,
                         Description = $"**Server:** { Server }<br>" +
-                         $"**Database:** { Database }<br>" +
+                        $"**Database:** { Database }<br>" +
                         $"**Runtime:** { System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription }<br>" +
                         $"**netCore Version :** { System.Environment.Version }<br>" +
-                        $"**Documentación :**  { Configuration.GetSection("SwaggerOptions:Doc").Value } [link]({ Configuration.GetSection("SwaggerOptions:Doc").Value })"
+                        $"**Documentation :**  { Configuration.GetSection("SwaggerOptions:Doc").Value } " +
+                        $"[link]({ Configuration.GetSection("SwaggerOptions:Doc").Value })"
                     });
             });
 
-            services.Configure<IISOptions>(options =>
+            if (IsDebugWithDocker())
             {
-                options.AutomaticAuthentication = true;
-            });
+                services.AddAuthorization(options =>
+                {
+                    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                        .RequireAssertion(_ => true)
+                        .Build();
+                });
+            }
+            else
+            {
+                services.Configure<IISOptions>(options =>
+                {
+                    options.AutomaticAuthentication = true;
+                });
+            }
 
             services.AddCors(options =>
             {
@@ -126,10 +139,12 @@ namespace ApiKeyPOC
                 loggerFactory.AddFile(Configuration.GetSection("Logging:LogFile:LogPath").Value);
             }
 
-#if DEBUG || PERSONAL
-            app.UseDeveloperExceptionPage();
-            _Logger.LogInformation($"In { env.EnvironmentName } environment");
-#endif
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                _Logger.LogInformation($"In { env.EnvironmentName } environment");
+            }
+ 
 
             var swaggerUrl = Configuration.GetSection("SwaggerOptions:UIEndpoint");
             app.UseSwagger();
@@ -151,6 +166,25 @@ namespace ApiKeyPOC
                 endpoints.MapControllers()
                     .RequireCors(AllowAll);
             });
+        }
+        
+        /// <summary>
+        /// Determines if the application is running in a development environment with Docker.
+        /// </summary>
+        /// <returns>
+        /// True if the environment is set to "Development" and Docker is enabled; otherwise, false.
+        /// </returns>
+        private static bool IsDebugWithDocker()
+        {
+            return Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" 
+                   && Environment.GetEnvironmentVariable("DOCKER_ENVIRONMENT") == "true";
+        }
+        
+        private Action<DbContextOptionsBuilder> OptionsAction()
+        {
+            return IsDebugWithDocker()
+                ? options => options.UseSqlServer(Configuration.GetConnectionString("SQLServerDocker"))
+                : options => options.UseSqlServer(Configuration.GetConnectionString("SQLServer"));
         }
     }
 }
