@@ -31,7 +31,7 @@ namespace ApiKeyPOC.Controllers
         private readonly ILogger<KeyController> _Logger;
         private readonly IServiceKey _ServiceKey;
         private readonly IHttpContextAccessor _Accessor;
-        public KeyController(IHttpContextAccessor accessor, IServiceKey service, ILogger<KeyController> logger) : base()
+        public KeyController(IHttpContextAccessor accessor, IServiceKey service, ILogger<KeyController> logger)
         {
             _Logger = logger;
             _ServiceKey = service;
@@ -43,13 +43,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                List<Key> listKeys = ImpersontedControllerAction<List<Key>>(_ServiceKey.GetKeys);
+                List<Key> listKeys = ImpersontedControllerAction(_ServiceKey.GetKeys);
 
                 string message = "Returned all records!!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<List<Key>>(HttpStatusCode.OK, message, listKeys));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -61,13 +61,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                Key key = ImpersontedControllerAction<int, Key>(_ServiceKey.GetKey,id);
+                Key key = ImpersontedControllerAction(_ServiceKey.GetKey,id);
 
                 string message = $"Returned key ::> { key.apiKey } Success!!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<Key>(HttpStatusCode.OK, message, key));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -80,13 +80,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                AssingnedKeyDTO assingnedKey = ImpersontedControllerAction<AssingnKeyDTO, AssingnedKeyDTO>(_ServiceKey.AssignKey, assingnKeyDTO);
+                AssingnedKeyDTO assingnedKey = ImpersontedControllerAction(_ServiceKey.AssignKey, assingnKeyDTO);
 
                 string message = $"Assigned key ::> { assingnedKey.apiKey } Success!!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<AssingnedKeyDTO>(HttpStatusCode.OK, message, assingnedKey));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -98,13 +98,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                AssingnedKeyDTO assingnedKey = ImpersontedControllerAction<AccessKeyDTO, AssingnedKeyDTO>(_ServiceKey.Enable, assingnKeyDTO);
+                AssingnedKeyDTO assingnedKey = ImpersontedControllerAction(_ServiceKey.Enable, assingnKeyDTO);
 
                 string message = $"Enable key ::> { assingnedKey.apiKey } Success!!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<AssingnedKeyDTO>(HttpStatusCode.OK, message, assingnedKey));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -116,7 +116,7 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                int? number = ImpersontedControllerAction<Guid, string, int>(_ServiceKey.Disable, key, ImpersontedUser());
+                int? number = ImpersontedControllerAction(_ServiceKey.Disable, key, ImpersontedUser());
                 JObject row_affected = new JObject();
                 row_affected.Add("Row affected", number);
 
@@ -124,7 +124,7 @@ namespace ApiKeyPOC.Controllers
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, row_affected));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -136,13 +136,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                BindedDTO bindedDTO = ImpersontedControllerAction<BindDTO, BindedDTO>(_ServiceKey.GrantAppAccess, bindDTO);
+                BindedDTO bindedDTO = ImpersontedControllerAction(_ServiceKey.GrantAppAccess, bindDTO);
 
                 string message = $"Grant app access key ::> { bindedDTO.apiKey } & { bindedDTO.nameApp } Success!!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<BindedDTO>(HttpStatusCode.OK, message, bindedDTO));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -154,13 +154,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                BindedDTO bindedDTO = ImpersontedControllerAction<BindDTO, string, BindedDTO>(_ServiceKey.RevokeAppAccess, bindDTO, ImpersontedUser());
+                BindedDTO bindedDTO = ImpersontedControllerAction(_ServiceKey.RevokeAppAccess, bindDTO, ImpersontedUser());
 
                 string message = $"Revoke app access key ::> { bindedDTO.apiKey } & { bindedDTO.nameApp } Success!!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<BindedDTO>(HttpStatusCode.OK, message, bindedDTO));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);

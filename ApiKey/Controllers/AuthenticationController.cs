@@ -1,4 +1,6 @@
-﻿using ApiKeyPOC.Results;
+﻿using System;
+using System.Net;
+using ApiKeyPOC.Results;
 using Application.IServices;
 using Domain.DTOs;
 using Microsoft.AspNetCore.Authorization;
@@ -6,28 +8,36 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace ApiKeyPOC.Controllers
 {
+    /// <summary>
+    /// Controlador para verificar la autenticidad de una API Key. Es consumido desde la librería apikey.
+    /// </summary>
     [AllowAnonymous]
     [Route("api/[controller]")]
     public class AuthenticationController : CustomController
     {
         private readonly ILogger<AuthenticationController> _Logger;
+        
         private readonly IServiceAuthentication _ServiceAuthentication;
-        private readonly IHttpContextAccessor _Accessor;
-        public AuthenticationController(IHttpContextAccessor accessor, IServiceAuthentication service, ILogger<AuthenticationController> logger) : base()
+        
+        /// <summary>
+        /// Inicializa una nueva instancia del controlador de autenticación.
+        /// </summary>
+        /// <param name="service">Servicio de autenticación de API Keys.</param>
+        /// <param name="logger">Logger para registrar eventos y errores.</param>
+        public AuthenticationController(IServiceAuthentication service, ILogger<AuthenticationController> logger)
         {
             _Logger = logger;
             _ServiceAuthentication = service;
-            _Accessor = accessor;
         }
-     
+        
+        /// <summary>
+        /// Verifica la autenticidad de una API Key recibida en el cuerpo de la solicitud.
+        /// </summary>
+        /// <param name="requestDTO">Datos de la solicitud de autenticación.</param>
+        /// <returns>Resultado HTTP con el estado de la autenticidad de la API Key.</returns>
         [AllowAnonymous]
         [HttpPost("VerificationKey")]
         public IActionResult VerificationKey([FromBody] RequestDTO requestDTO)
@@ -43,7 +53,7 @@ namespace ApiKeyPOC.Controllers
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, row_affected));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -51,7 +61,8 @@ namespace ApiKeyPOC.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("IsInRange/{apikey}/{remoteIp}'Solo_para_Test'")]
+        [HttpGet("IsInRange/{apikey}/{remoteIp}")]
+        [ApiExplorerSettings(IgnoreApi = true)]
         public IActionResult IsInRange(Guid apikey, string remoteIp)
         {
             try
@@ -65,7 +76,7 @@ namespace ApiKeyPOC.Controllers
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, row_affected));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);

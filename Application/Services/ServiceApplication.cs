@@ -1,13 +1,9 @@
-﻿using Application.IFactory;
-using Application.IServices;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Application.IFactory;
 using DataAccess.Models;
 using Domain.DTOs;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -24,7 +20,7 @@ namespace Application.Services
 
         public DataAccess.Models.Application GetAppById(int appId)
         {
-            return _Context.Set<DataAccess.Models.Application>().Where(e => e.id.Equals(appId)).FirstOrDefault();
+            return _Context.Set<DataAccess.Models.Application>().FirstOrDefault(e => e.id.Equals(appId));
         }
 
         public List<DataAccess.Models.Application> GetApps()
@@ -32,7 +28,7 @@ namespace Application.Services
             return _Context.Set<DataAccess.Models.Application>().ToList();
         }
 
-        public int Register(ApplicationDTO appDTO)
+        public int Save(ApplicationDTO appDTO)
         {
             appDTO.name = NormalizeString(appDTO.name);
             DataAccess.Models.Application app = _Service.Mapper().Map<DataAccess.Models.Application>(appDTO);

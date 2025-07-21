@@ -11,6 +11,6 @@ namespace Application.Services
     {
         DataAccess.Models.Application GetAppById(int appId);
         List<DataAccess.Models.Application> GetApps();
-        int Register(ApplicationDTO app);
+        int Save(ApplicationDTO app);
     }
 }

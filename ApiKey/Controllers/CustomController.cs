@@ -1,11 +1,10 @@
-﻿using ApiKeyPOC.Results;
-using Application.IServices;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.IISIntegration;
-using System;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Security.Principal;
+using ApiKeyPOC.Results;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ApiKeyPOC.Controllers
 {
@@ -28,14 +27,11 @@ namespace ApiKeyPOC.Controllers
                 var message = ((CustomException)e).Message;
                 return StatusCode((int)HttpStatusCode.PreconditionFailed, new ResponseApi<object>(HttpStatusCode.PreconditionFailed, "ha ocurrido un error", null, e.InnerException != null ? e.InnerException.Message : message, errorCode));
             }
-            else
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApi<object>(HttpStatusCode.InternalServerError, "ha ocurrido un error", null, e.InnerException != null ? e.InnerException.Message : e.Message));
-            }
+            return StatusCode((int)HttpStatusCode.InternalServerError, new ResponseApi<object>(HttpStatusCode.InternalServerError, "ha ocurrido un error", null, e.InnerException != null ? e.InnerException.Message : e.Message));
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
+        [SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
         public Tout ImpersontedControllerAction<Tout>(Func< Tout> serviceMethod)
         {
             if (IsDebugWithDocker())
@@ -51,7 +47,7 @@ namespace ApiKeyPOC.Controllers
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
+        [SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
         public Tout ImpersontedControllerAction<Tin, Tout>(Func<Tin, Tout> serviceMethod, Tin param1)
         {
             if (IsDebugWithDocker())
@@ -67,7 +63,7 @@ namespace ApiKeyPOC.Controllers
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
+        [SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
         public Tout ImpersontedControllerAction<Tin, Tin2, Tout>(Func<Tin, Tin2, Tout> serviceMethod, Tin param1, Tin2 param2)
         {
             if (IsDebugWithDocker())
@@ -83,7 +79,7 @@ namespace ApiKeyPOC.Controllers
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
+        [SuppressMessage("Interoperability", "CA1416:Validar la compatibilidad de la plataforma", Justification = "<pendiente>")]
         public string ImpersontedUser()
         {
             if (IsDebugWithDocker())

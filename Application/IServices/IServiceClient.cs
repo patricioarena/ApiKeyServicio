@@ -8,7 +8,7 @@ namespace Application.IServices
     {
         Client GetClientById(int clientId);
         List<Client> GetClients();
-        int Register(ClientDTO clientDTO);
+        int Save(ClientDTO clientDTO);
         int Disable(int clientId, string revoke_user);
     }
 }

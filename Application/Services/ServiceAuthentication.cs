@@ -1,128 +1,180 @@
-﻿using Application.IFactory;
+﻿using System;
+using System.Linq;
 using Application.IServices;
+using Application.Services.UseCase;
 using DataAccess.Models;
 using Domain.DTOs;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Primitives;
 
 namespace Application.Services
 {
+    /// <summary>
+    /// Servicio encargado de la autenticación y validación de claves, clientes y aplicaciones,
+    /// así como del registro de logs relacionados con la autenticación de API Keys.
+    /// </summary>
     public class ServiceAuthentication : IServiceAuthentication
     {
         private readonly DbContext _Context;
-        private readonly IAbstractServiceFactory _Service;
 
         private readonly IServiceLogApikeyDB _ServiceLogApikeyDB;
-        public ServiceAuthentication(ApiKeyDbContext context, IAbstractServiceFactory service, IServiceLogApikeyDB serviceLog)
+
+        /// <summary>
+        /// Inicializa una nueva instancia del servicio de autenticación.
+        /// </summary>
+        /// <param name="context">Contexto de base de datos para acceder a los datos.</param>
+        /// <param name="serviceLog">Servicio para registrar logs de autenticación.</param>
+        public ServiceAuthentication(ApiKeyDbContext context, IServiceLogApikeyDB serviceLog)
         {
             _Context = context;
-            _Service = service;
             _ServiceLogApikeyDB = serviceLog;
         }
 
+        /// <summary>
+        /// Verifica si la clave API, cliente y aplicación asociados a la solicitud son válidos y tienen acceso autorizado.
+        /// </summary>
+        /// <param name="request">Datos de la solicitud de autenticación.</param>
+        /// <returns>True si la clave, cliente, aplicación y rango de IP son válidos; de lo contrario, false.</returns>
         public bool VerificationKey(RequestDTO request)
         {
-            Guid guidKey = request.apiKey;
-            Key key = _Context.Set<Key>().Where(e => e.apiKey.Equals(guidKey)).FirstOrDefault();
+            Key key = GetAndValidateKey(request);
+            Client client = GetAndValidateClient(request);
+            ValidateKeyClientRelationship(key, client, request);
+            DataAccess.Models.Application app = GetAndValidateApplication(request);
+            Key_Application keyApp = GetAndValidateKeyApplication(key, app, client, request);
 
+            bool isInRange = ValidateIpRange(key, request);
+            bool isValidKey = keyApp.key.enabled;
+            bool isValidClient = keyApp.key.client.enabled;
+            bool hasAccess = keyApp.enabled ?? false;
+
+            return isValidKey && isValidClient && hasAccess && isInRange;
+        }
+        
+        /// <summary>
+        /// Verifica si el cliente de Authentica de una organización está autorizado, considerando la validez del Referer,
+        /// la clave API, el cliente, la aplicación, el acceso y el rango de IP.
+        /// </summary>
+        /// <param name="values">Valores del header Referer de la petición HTTP.</param>
+        /// <param name="request">Datos de la solicitud de autenticación.</param>
+        /// <returns>True si todos los criterios de autorización se cumplen; de lo contrario, false.</returns>
+        public bool VerificationKeyForAuthentica(StringValues values, RequestDTO request)
+        {
+            Key key = GetAndValidateKey(request);
+            Client client = GetAndValidateClient(request);
+            ValidateKeyClientRelationship(key, client, request);
+            DataAccess.Models.Application app = GetAndValidateApplication(request);
+            Key_Application keyApp = GetAndValidateKeyApplication(key, app, client, request);
+            
+            bool isRefValid = isRefererValid(values);
+            bool isInRange = ValidateIpRange(key, request);
+            bool isValidKey = keyApp.key.enabled;
+            bool isValidClient = keyApp.key.client.enabled;
+            bool hasAccess = keyApp.enabled ?? false;
+
+            return isValidKey && isValidClient && hasAccess && isInRange && isRefValid;
+        }
+
+        /// <summary>
+        /// Verifica si la dirección IP proporcionada se encuentra dentro del rango permitido para la clave API especificada.
+        /// </summary>
+        /// <param name="apiKey">Clave API a validar.</param>
+        /// <param name="address">Dirección IP a verificar.</param>
+        /// <returns>True si la dirección está dentro del rango permitido; de lo contrario, false.</returns>
+        public bool IsInRange(Guid apiKey, string address)
+        {
+            Guid guidKey = apiKey;
+            Key key = _Context.Set<Key>().FirstOrDefault(e => e.apiKey.Equals(guidKey));
+
+            return IsAddressRangeValid.Test(key, address);
+        }
+        
+        private bool isRefererValid(StringValues values)
+        {
+            if (string.IsNullOrEmpty(values)) 
+                return false;
+            
+            //TODO: Sacar los referer de una tabla en db
+            if (values.ToString().StartsWith("https://www.ejemplo.com"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private Key GetAndValidateKey(RequestDTO request)
+        {
+            var key = _Context.Set<Key>().FirstOrDefault(e => e.apiKey.Equals(request.apiKey));
             if (key == null)
             {
                 _ServiceLogApikeyDB.LogDb(request, Message.null_Key);
                 throw new NullReferenceException(Message.null_Key);
             }
 
-            int clientId = request.clientId;
-            Client client = _Context.Set<Client>().Where(e => e.id.Equals(clientId)).FirstOrDefault();
+            return key;
+        }
 
+        private Client GetAndValidateClient(RequestDTO request)
+        {
+            var client = _Context.Set<Client>().FirstOrDefault(e => e.id.Equals(request.clientId));
             if (client == null)
             {
                 _ServiceLogApikeyDB.LogDb(request, Message.null_Client);
                 throw new NullReferenceException(Message.null_Client);
             }
 
-            if (!key.clientId.Equals(clientId))
+            return client;
+        }
+
+        private void ValidateKeyClientRelationship(Key key, Client client, RequestDTO request)
+        {
+            if (!key.clientId.Equals(client.id))
             {
                 _ServiceLogApikeyDB.LogDb(request, Message.null_relationship);
                 throw new NullReferenceException(Message.null_relationship);
             }
+        }
 
-            int appId = request.appId;
-            DataAccess.Models.Application app = _Context.Set<DataAccess.Models.Application>().Where(e => e.id.Equals(appId)).FirstOrDefault();
-
+        private DataAccess.Models.Application GetAndValidateApplication(RequestDTO request)
+        {
+            var app = _Context.Set<DataAccess.Models.Application>()
+                .FirstOrDefault(e => e.id.Equals(request.appId));
+            
             if (app == null)
             {
                 _ServiceLogApikeyDB.LogDb(request, Message.null_App);
                 throw new NullReferenceException(Message.null_App);
             }
 
-            Key_Application key_Application = _Context.Set<Key_Application>()
-                .Where(e => e.clientId.Equals(request.clientId))
-                .Where(e => e.applicationId.Equals(request.appId))
+            return app;
+        }
+
+        private Key_Application GetAndValidateKeyApplication(Key key, DataAccess.Models.Application app, Client client, RequestDTO request)
+        {
+            var keyApp = _Context.Set<Key_Application>()
+                .Where(e => e.clientId.Equals(client.id))
+                .Where(e => e.applicationId.Equals(app.id))
                 .Where(e => e.keyId.Equals(key.id))
                 .Include(e => e.key)
                 .Include(e => e.key.client)
                 .FirstOrDefault();
 
-            if (key_Application == null)
+            if (keyApp == null)
             {
                 _ServiceLogApikeyDB.LogDb(request, Message.null_relationship2);
                 throw new NullReferenceException(Message.null_relationship2);
             }
 
-            var IsInRange = true;
+            return keyApp;
+        }
 
-            // Descomentar cuando se requiera verificar
-            // que el ip desde el que se realiza la peticion esta dentro
-            // del rango establecido 
-
-            //if ((key.ipStart == null) || (key.ipEnd == null))
-            //{
-            //    _ServiceLogApikeyDB.LogDb(request, Message.null_ip);
-            //    throw new NullReferenceException(Message.null_ip);
-            //}
-
-            //IsInRange = this.IsInRange(key.ipStart, key.ipEnd, request.remoteIp);
-
-            if (IsInRange.Equals(false))
+        private bool ValidateIpRange(Key key, RequestDTO request)
+        {
+            var isInRange = IsAddressRangeValid.Test(key, request.remoteIp);
+            if (!isInRange)
                 _ServiceLogApikeyDB.LogDb(request, Message.ip_out_range);
-
-            var isValidKey = key_Application.key.enabled;
-            var isValidClient = key_Application.key.client.enabled;
-            var hasAccess = key_Application.enabled;
-
-            if ((isValidKey == true) && (isValidClient == true) && (hasAccess == true) && (IsInRange == true))
-                return true;
-            return false;
+            return isInRange;
         }
-
-        public bool IsInRange(Guid apiKey, string address)
-        {
-            Guid guidKey = apiKey;
-            Key key = _Context.Set<Key>().Where(e => e.apiKey.Equals(guidKey)).FirstOrDefault();
-
-            if (key == null)
-                throw new NullReferenceException(Message.null_Key);
-
-            if ((key.ipStart == null) || (key.ipEnd == null))
-                throw new NullReferenceException(Message.null_ip);
-
-            var IsInRange = this.IsInRange(key.ipStart, key.ipEnd, address);
-
-            return IsInRange;
-        }
-
-        public bool IsInRange(string startIpAddr, string endIpAddr, string address)
-        {
-            long ipStart = BitConverter.ToInt32(IPAddress.Parse(startIpAddr).GetAddressBytes().Reverse().ToArray(), 0);
-            long ipEnd = BitConverter.ToInt32(IPAddress.Parse(endIpAddr).GetAddressBytes().Reverse().ToArray(), 0);
-            long ip = BitConverter.ToInt32(IPAddress.Parse(address).GetAddressBytes().Reverse().ToArray(), 0);
-            return ip >= ipStart && ip <= ipEnd;
-        }
-
     }
 }

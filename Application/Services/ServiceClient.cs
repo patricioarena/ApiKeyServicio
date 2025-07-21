@@ -14,6 +14,7 @@ namespace Application.Services
     public class ServiceClient : ServiceGeneral, IServiceClient
     {
         private readonly DbContext _Context;
+        
         private readonly IAbstractServiceFactory _Service;
 
         public ServiceClient(ApiKeyDbContext context, IAbstractServiceFactory service)
@@ -32,7 +33,7 @@ namespace Application.Services
             return _Context.Set<Client>().Where(e => e.id.Equals(clientId)).Include(e => e.Keys).FirstOrDefault();
         }
 
-        public int Register(ClientDTO clientDTO)
+        public int Save(ClientDTO clientDTO)
         {
             clientDTO.client = NormalizeString(clientDTO.client);
             Client client = _Service.Mapper().Map<Client>(clientDTO);
@@ -46,7 +47,7 @@ namespace Application.Services
 
         public int Disable(int clientId, string revoke_user)
         {
-            var Update = _Context.Set<Client>().Where(e => e.id.Equals(clientId)).FirstOrDefault();
+            var Update = _Context.Set<Client>().FirstOrDefault(e => e.id.Equals(clientId));
 
             if (Update == null)
                 throw new NullReferenceException(Message.null_Client);
@@ -58,6 +59,42 @@ namespace Application.Services
             return _Context.SaveChanges();
         }
 
-    }
+        public bool CreateClientForAuthentica(ClientWithKeyDTO clientDTO)
+        {
+            using (var transaction = _Context.Database.BeginTransaction())
+            {
+                try
+                {
+                    // Crear el cliente
+                    clientDTO.client = NormalizeString(clientDTO.client);
+                    Client client = _Service.Mapper().Map<Client>(clientDTO);
+                    _Context.Set<Client>().Add(client);
+                    _Context.SaveChanges();
 
+                    // Asignar la key al cliente creado
+                    AssingnKeyDTO assingnKeyDTO = new AssingnKeyDTO
+                    {
+                        clientId = client.id,
+                        ipStart = clientDTO.ipStart,
+                        ipEnd = clientDTO.ipEnd,
+                        referer = clientDTO.referer
+                    };
+                    
+                    Key key = _Service.Mapper().Map<Key>(assingnKeyDTO);
+                    _Context.Set<Key>().Add(key);
+                    _Context.SaveChanges();
+
+                    // Commit de la transacción
+                    transaction.Commit();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    // Rollback en caso de error
+                    transaction.Rollback();
+                    return false;
+                }
+            }
+        }
+    }
 }

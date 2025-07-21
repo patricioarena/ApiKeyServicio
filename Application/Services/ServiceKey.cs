@@ -14,6 +14,7 @@ namespace Application.Services
     public class ServiceKey : IServiceKey
     {
         private readonly DbContext _Context;
+        
         private readonly IAbstractServiceFactory _Service;
 
         public ServiceKey(ApiKeyDbContext context, IAbstractServiceFactory service)
@@ -86,14 +87,12 @@ namespace Application.Services
                 throw new NullReferenceException($"Apikey: { guidKey } is null or no exit");
 
             int clientId = accessKeyDTO.clientId;
-            var client = _Context.Set<Client>().Where(e => e.id.Equals(clientId)).FirstOrDefault();
+            var client = _Context.Set<Client>().FirstOrDefault(e => e.id.Equals(clientId));
 
             if (client == null)
                 throw new NullReferenceException("Client is null or no exit");
 
-            bool isEnabled = false;
-            if (key.clientId == client.id)
-                isEnabled = true;
+            bool isEnabled = key.clientId == client.id;
 
             key.enabled = isEnabled;
 
@@ -118,7 +117,7 @@ namespace Application.Services
         
         public int Disable(Guid key, string revoke_user)
         {
-            var Update = _Context.Set<Key>().Where(e => e.apiKey.Equals(key)).FirstOrDefault();
+            var Update = _Context.Set<Key>().FirstOrDefault(e => e.apiKey.Equals(key));
 
             if (Update == null)
                 throw new NullReferenceException("Apikey is null or no exit");
@@ -139,8 +138,8 @@ namespace Application.Services
                 throw new NullReferenceException($"Apikey: { guidKey } is null or no exit");
 
             int appId = bindDTO.applicationId;
-            DataAccess.Models.Application app = _Context.Set<DataAccess.Models.Application>()
-                    .Where(e => e.id.Equals(appId)).FirstOrDefault();
+            DataAccess.Models.Application app = _Context
+                .Set<DataAccess.Models.Application>().FirstOrDefault(e => e.id.Equals(appId));
 
             if (app == null)
                 throw new NullReferenceException($"ApplicationId: { appId } is null or no exit");
@@ -178,7 +177,7 @@ namespace Application.Services
                 throw new NullReferenceException($"Apikey: { guidKey } is null or no exit");
 
             int appId = bindDTO.applicationId;
-            DataAccess.Models.Application app = _Context.Set<DataAccess.Models.Application>().Where(e => e.id.Equals(appId)).FirstOrDefault();
+            DataAccess.Models.Application app = _Context.Set<DataAccess.Models.Application>().FirstOrDefault(e => e.id.Equals(appId));
 
             if (app == null)
                 throw new NullReferenceException($"ApplicationId: { appId } is null or no exit");

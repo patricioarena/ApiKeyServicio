@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Application;
 using Application.Factory;
 using Application.IFactory;
@@ -17,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 
 namespace ApiKeyPOC
 {
@@ -60,9 +62,9 @@ namespace ApiKeyPOC
             
             services.AddSingleton(typeof(ILogger), logger);
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddSingleton(Configuration);
             services.AddMvc().AddNewtonsoftJson(options => 
-                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
 
             MapperConfiguration mapperConfiguration = new MapperConfiguration(config =>
             {
@@ -91,8 +93,8 @@ namespace ApiKeyPOC
                         Title = Configuration.GetSection("SwaggerOptions:Description").Value,
                         Description = $"**Server:** { Server }<br>" +
                         $"**Database:** { Database }<br>" +
-                        $"**Runtime:** { System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription }<br>" +
-                        $"**netCore Version :** { System.Environment.Version }<br>" +
+                        $"**Runtime:** { RuntimeInformation.FrameworkDescription }<br>" +
+                        $"**netCore Version :** { Environment.Version }<br>" +
                         $"**Documentation :**  { Configuration.GetSection("SwaggerOptions:Doc").Value } " +
                         $"[link]({ Configuration.GetSection("SwaggerOptions:Doc").Value })"
                     });
@@ -144,9 +146,7 @@ namespace ApiKeyPOC
                 app.UseDeveloperExceptionPage();
                 _Logger.LogInformation($"In { env.EnvironmentName } environment");
             }
- 
-
-            var swaggerUrl = Configuration.GetSection("SwaggerOptions:UIEndpoint");
+            
             app.UseSwagger();
             app.UseSwaggerUI(option =>
             {

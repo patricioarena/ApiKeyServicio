@@ -11,6 +11,6 @@ namespace Domain.DTOs
         public int clientId { get; set; }
         public string ipStart { get; set; }
         public string ipEnd { get; set; }
-
+        public string referer { get; set; }
     }
 }

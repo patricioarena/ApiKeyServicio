@@ -28,7 +28,7 @@ namespace ApiKeyPOC.Controllers
     {
         private readonly ILogger<ClientController> _Logger;
         private readonly IServiceClient _ServiceClient;
-        public ClientController(IServiceClient service, ILogger<ClientController> logger) : base()
+        public ClientController(IServiceClient service, ILogger<ClientController> logger)
         {
             _Logger = logger;
             _ServiceClient = service;
@@ -39,13 +39,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                List<Client> listClients = ImpersontedControllerAction<List<Client>>(_ServiceClient.GetClients);
+                List<Client> listClients = ImpersontedControllerAction(_ServiceClient.GetClients);
 
                 string message = "Returned all records!!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<List<Client>>(HttpStatusCode.OK, message, listClients));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -57,13 +57,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                Client client = ImpersontedControllerAction<int,Client>(_ServiceClient.GetClientById,id);
+                Client client = ImpersontedControllerAction(_ServiceClient.GetClientById,id);
 
                 string message = $"Returned record ::> { id } !!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<Client>(HttpStatusCode.OK, message, client));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -75,7 +75,7 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                int? id = ImpersontedControllerAction<ClientDTO, int>(_ServiceClient.Register, clientDTO);
+                int? id = ImpersontedControllerAction(_ServiceClient.Save, clientDTO);
                 JObject row_affected = new JObject();
                 row_affected.Add("id", id);
 
@@ -83,7 +83,7 @@ namespace ApiKeyPOC.Controllers
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, row_affected));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -95,7 +95,7 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                int? number = ImpersontedControllerAction<int, string, int>(_ServiceClient.Disable, id, ImpersontedUser());
+                int? number = ImpersontedControllerAction(_ServiceClient.Disable, id, ImpersontedUser());
                 JObject row_affected = new JObject();
                 row_affected.Add("Row affected", number);
 
@@ -103,7 +103,7 @@ namespace ApiKeyPOC.Controllers
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, row_affected));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);

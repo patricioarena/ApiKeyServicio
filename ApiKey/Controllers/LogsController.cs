@@ -28,8 +28,10 @@ namespace ApiKeyPOC.Controllers
     public class LogsController : CustomController
     {
         private readonly ILogger<LogsController> _Logger;
+        
         private readonly IServiceLogApikeyDB _ServiceLogApikeyDB;
-        public LogsController(IServiceLogApikeyDB service, ILogger<LogsController> logger) : base()
+        
+        public LogsController(IServiceLogApikeyDB service, ILogger<LogsController> logger)
         {
             _Logger = logger;
             _ServiceLogApikeyDB = service;
@@ -40,13 +42,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                List<LogDTO> listLogs = ImpersontedControllerAction<List<LogDTO>>(_ServiceLogApikeyDB.GetLogs);
+                List<LogDTO> listLogs = ImpersontedControllerAction(_ServiceLogApikeyDB.GetLogs);
 
                 string message = "Returned all records!!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<List<LogDTO>>(HttpStatusCode.OK, message, listLogs));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -58,13 +60,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                List<LogDTO> listLogs = ImpersontedControllerAction<int, List<LogDTO>>(_ServiceLogApikeyDB.ByClient, id);
+                List<LogDTO> listLogs = ImpersontedControllerAction(_ServiceLogApikeyDB.ByClient, id);
 
                 string message = $"Returned all record for ::> { id } !!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<List<LogDTO>>(HttpStatusCode.OK, message, listLogs));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -76,13 +78,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                List<LogDTO> listLogs = ImpersontedControllerAction<Guid, List<LogDTO>>(_ServiceLogApikeyDB.ByClientKey, apikey);
+                List<LogDTO> listLogs = ImpersontedControllerAction(_ServiceLogApikeyDB.ByClientKey, apikey);
 
                 string message = $"Returned all record for ::> { apikey } !!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<List<LogDTO>>(HttpStatusCode.OK, message, listLogs));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);

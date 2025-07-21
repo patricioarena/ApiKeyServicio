@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -15,20 +11,16 @@ namespace ApiKeyPOC.Controllers
     [ApiExplorerSettings(IgnoreApi = true)]
     public class ValuesController : ControllerBase
     {
-        private readonly IHttpContextAccessor _HttpContext;
         private readonly ILogger<ValuesController> _logger;
-        public ValuesController(ILogger<ValuesController> logger, IHttpContextAccessor HttpContext)
-        {
-            _HttpContext = HttpContext;
-            _logger = logger;
-        }
+        
+        public ValuesController(ILogger<ValuesController> logger) => _logger = logger;
 
         // GET api/values
         [HttpGet]
         [AllowAnonymous]
         public string[] Get()
         {
-            string[] collection = new string[] { "value1", "value2" };
+            string[] collection = { "value1", "value2" };
 
             _logger.LogInformation("Log message in the ::> Get()");
             return collection;

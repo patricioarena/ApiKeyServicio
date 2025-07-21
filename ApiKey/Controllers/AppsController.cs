@@ -29,7 +29,7 @@ namespace ApiKeyPOC.Controllers
     {
         private readonly ILogger<AppsController> _Logger;
         private readonly IServiceApplication _ServiceApps;
-        public AppsController(IServiceApplication service, ILogger<AppsController> logger) : base()
+        public AppsController(IServiceApplication service, ILogger<AppsController> logger)
         {
             _Logger = logger;
             _ServiceApps = service;
@@ -40,13 +40,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                List<DataAccess.Models.Application> listApps = ImpersontedControllerAction<List<DataAccess.Models.Application>>(_ServiceApps.GetApps);
+                List<DataAccess.Models.Application> listApps = ImpersontedControllerAction(_ServiceApps.GetApps);
 
                 string message = "Returned all records!!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<List<DataAccess.Models.Application>>(HttpStatusCode.OK, message, listApps));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -58,13 +58,13 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                DataAccess.Models.Application app = ImpersontedControllerAction<int, DataAccess.Models.Application>(_ServiceApps.GetAppById,id);
+                DataAccess.Models.Application app = ImpersontedControllerAction(_ServiceApps.GetAppById,id);
 
                 string message = $"Returned record ::> { id } !!";
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<DataAccess.Models.Application>(HttpStatusCode.OK, message, app));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
@@ -76,7 +76,7 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                int? id = ImpersontedControllerAction<ApplicationDTO, int>(_ServiceApps.Register, appDTO);
+                int? id = ImpersontedControllerAction(_ServiceApps.Save, appDTO);
                 JObject row_affected = new JObject();
                 row_affected.Add("id", id.ToString());
 
@@ -84,7 +84,7 @@ namespace ApiKeyPOC.Controllers
                 _Logger.LogInformation(message);
                 return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, row_affected));
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 _Logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
