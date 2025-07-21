@@ -17,7 +17,7 @@ namespace ApiKeyPOC.Controllers
     /// </summary>
     [AllowAnonymous]
     [Route("api/[controller]")]
-    public class AuthenticaClientValidatorController : CustomController
+    public class AuthenticaClientController : CustomController
     {
         private static readonly string Referer = "Referer";
 
@@ -27,11 +27,15 @@ namespace ApiKeyPOC.Controllers
 
         private readonly IServiceAuthentication _ServiceAuthentication;
 
-        public AuthenticaClientValidatorController(IHttpContextAccessor accessor, IServiceAuthentication service, ILogger<AuthenticationController> logger)
+        private readonly IServiceClient _ServiceClient;
+
+        public AuthenticaClientController(IHttpContextAccessor accessor, IServiceAuthentication serviceAuthentication, 
+            IServiceClient serviceClient, ILogger<AuthenticationController> logger)
         {
-            _Logger = logger;
-            _ServiceAuthentication = service;
+            _ServiceAuthentication = serviceAuthentication;
+            _ServiceClient = serviceClient;
             _Accessor = accessor;
+            _Logger = logger;
         }
 
         [HttpGet("Validate/Client/{clientId}")]
@@ -65,6 +69,26 @@ namespace ApiKeyPOC.Controllers
             {
                 Console.WriteLine(e);
                 throw;
+            }
+        }
+        
+        [HttpPost("Register")]
+        public IActionResult SetClient([FromBody] ClientWithKeyDTO clientDTO)
+        {
+            try
+            {
+                bool isCreated = ImpersontedControllerAction(_ServiceClient.CreateClientForAuthentica, clientDTO);
+                JObject row_affected = new JObject();
+                row_affected.Add("isCreated", isCreated);
+
+                string message = $"Created new client ::> { isCreated } Success!!";
+                _Logger.LogInformation(message);
+                return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, row_affected));
+            }
+            catch (Exception ex)
+            {
+                _Logger.LogError(ex.Message);
+                return CustomErrorStatusCode(ex);
             }
         }
     }

@@ -10,5 +10,6 @@ namespace Application.IServices
         List<Client> GetClients();
         int Save(ClientDTO clientDTO);
         int Disable(int clientId, string revoke_user);
+        bool CreateClientForAuthentica(ClientWithKeyDTO clientDTO);
     }
 }
