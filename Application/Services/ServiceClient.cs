@@ -59,14 +59,16 @@ namespace Application.Services
             return _Context.SaveChanges();
         }
 
-        public bool CreateClientForAuthentica(ClientWithKeyDTO clientDTO)
+        public bool CreateClientForAuthentica(ClientWithKeyDTO reqDTO)
         {
             using (var transaction = _Context.Database.BeginTransaction())
             {
                 try
                 {
                     // Crear el cliente
+                    ClientDTO clientDTO = new ClientDTO { client = reqDTO.client };
                     clientDTO.client = NormalizeString(clientDTO.client);
+                    
                     Client client = _Service.Mapper().Map<Client>(clientDTO);
                     _Context.Set<Client>().Add(client);
                     _Context.SaveChanges();
@@ -75,9 +77,9 @@ namespace Application.Services
                     AssingnKeyDTO assingnKeyDTO = new AssingnKeyDTO
                     {
                         clientId = client.id,
-                        ipStart = clientDTO.ipStart,
-                        ipEnd = clientDTO.ipEnd,
-                        referer = clientDTO.referer
+                        ipStart = reqDTO.ipStart,
+                        ipEnd = reqDTO.ipEnd,
+                        referer = reqDTO.referer
                     };
                     
                     Key key = _Service.Mapper().Map<Key>(assingnKeyDTO);
