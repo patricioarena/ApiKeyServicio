@@ -66,7 +66,7 @@ namespace Application.Services
             bool isRefValid = isRefererValid(values);
             bool isInRange = ValidateIpRange(key, request);
 
-            return isInRange && isRefValid;
+            return isInRange && isRefValid && client.enabled;
         }
 
         /// <summary>

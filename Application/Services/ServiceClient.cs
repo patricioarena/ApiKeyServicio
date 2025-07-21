@@ -70,6 +70,7 @@ namespace Application.Services
                     clientDto.client = NormalizeString(clientDto.client);
                     
                     Client client = _Service.Mapper().Map<Client>(clientDto);
+                    client.enabled = true;
                     _Context.Set<Client>().Add(client);
                     _Context.SaveChanges();
 
