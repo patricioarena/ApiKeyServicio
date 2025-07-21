@@ -2,7 +2,7 @@
 using System.Net;
 using ApiKeyPOC.Results;
 using Application.IServices;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -36,15 +36,15 @@ namespace ApiKeyPOC.Controllers
         /// <summary>
         /// Verifica la autenticidad de una API Key recibida en el cuerpo de la solicitud.
         /// </summary>
-        /// <param name="requestDTO">Datos de la solicitud de autenticación.</param>
+        /// <param name="requestDto">Datos de la solicitud de autenticación.</param>
         /// <returns>Resultado HTTP con el estado de la autenticidad de la API Key.</returns>
         [AllowAnonymous]
         [HttpPost("VerificationKey")]
-        public IActionResult VerificationKey([FromBody] RequestDTO requestDTO)
+        public IActionResult VerificationKey([FromBody] RequestDto requestDto)
         {
             try
             {
-                bool isValid = _ServiceAuthentication.VerificationKey(requestDTO);
+                bool isValid = _ServiceAuthentication.VerificationKey(requestDto);
 
                 JObject row_affected = new JObject();
                 row_affected.Add("isValid", isValid);

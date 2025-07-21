@@ -1,7 +1,7 @@
 ﻿using Application.IFactory;
 using Application.IServices;
 using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -33,10 +33,10 @@ namespace Application.Services
             return _Context.Set<Client>().Where(e => e.id.Equals(clientId)).Include(e => e.Keys).FirstOrDefault();
         }
 
-        public int Save(ClientDTO clientDTO)
+        public int Save(ClientDto clientDto)
         {
-            clientDTO.client = NormalizeString(clientDTO.client);
-            Client client = _Service.Mapper().Map<Client>(clientDTO);
+            clientDto.client = NormalizeString(clientDto.client);
+            Client client = _Service.Mapper().Map<Client>(clientDto);
             client.enabled = true;
 
             _Context.Set<Client>().Add(client);
@@ -59,30 +59,30 @@ namespace Application.Services
             return _Context.SaveChanges();
         }
 
-        public bool CreateClientForAuthentica(ClientWithKeyDTO reqDTO)
+        public bool CreateClientForAuthentica(ClientWithKeyDto reqDto)
         {
             using (var transaction = _Context.Database.BeginTransaction())
             {
                 try
                 {
                     // Crear el cliente
-                    ClientDTO clientDTO = new ClientDTO { client = reqDTO.client };
-                    clientDTO.client = NormalizeString(clientDTO.client);
+                    ClientDto clientDto = new ClientDto { client = reqDto.client };
+                    clientDto.client = NormalizeString(clientDto.client);
                     
-                    Client client = _Service.Mapper().Map<Client>(clientDTO);
+                    Client client = _Service.Mapper().Map<Client>(clientDto);
                     _Context.Set<Client>().Add(client);
                     _Context.SaveChanges();
 
                     // Asignar la key al cliente creado
-                    AssingnKeyDTO assingnKeyDTO = new AssingnKeyDTO
+                    AssingnKeyDto assingnKeyDto = new AssingnKeyDto
                     {
                         clientId = client.id,
-                        ipStart = reqDTO.ipStart,
-                        ipEnd = reqDTO.ipEnd,
-                        referer = reqDTO.referer
+                        ipStart = reqDto.ipStart,
+                        ipEnd = reqDto.ipEnd,
+                        referer = reqDto.referer
                     };
                     
-                    Key key = _Service.Mapper().Map<Key>(assingnKeyDTO);
+                    Key key = _Service.Mapper().Map<Key>(assingnKeyDto);
                     _Context.Set<Key>().Add(key);
                     _Context.SaveChanges();
 

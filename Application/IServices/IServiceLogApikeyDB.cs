@@ -1,5 +1,5 @@
 ﻿using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +10,9 @@ namespace Application.Services
 {
     public interface IServiceLogApikeyDB
     {
-        List<LogDTO> GetLogs();
-        List<LogDTO> ByClient(int id);
-        List<LogDTO> ByClientKey(Guid key);
-        int LogDb(RequestDTO request, string descriptionError);
+        List<LogDto> GetLogs();
+        List<LogDto> ByClient(int id);
+        List<LogDto> ByClientKey(Guid key);
+        int LogDb(RequestDto request, string descriptionError);
     }
 }

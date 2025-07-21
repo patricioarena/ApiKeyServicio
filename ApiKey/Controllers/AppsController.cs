@@ -2,7 +2,7 @@
 using Application.IServices;
 using Application.Services;
 using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.IISIntegration;
@@ -72,11 +72,11 @@ namespace ApiKeyPOC.Controllers
         }
 
         [HttpPost("Register")]
-        public IActionResult SetClient([FromBody] ApplicationDTO appDTO)
+        public IActionResult SetClient([FromBody] ApplicationDto appDto)
         {
             try
             {
-                int? id = ImpersontedControllerAction(_ServiceApps.Save, appDTO);
+                int? id = ImpersontedControllerAction(_ServiceApps.Save, appDto);
                 JObject row_affected = new JObject();
                 row_affected.Add("id", id.ToString());
 

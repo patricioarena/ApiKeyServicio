@@ -2,7 +2,7 @@
 using System.Linq;
 using Application.IFactory;
 using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Services
@@ -28,10 +28,10 @@ namespace Application.Services
             return _Context.Set<DataAccess.Models.Application>().ToList();
         }
 
-        public int Save(ApplicationDTO appDTO)
+        public int Save(ApplicationDto appDto)
         {
-            appDTO.name = NormalizeString(appDTO.name);
-            DataAccess.Models.Application app = _Service.Mapper().Map<DataAccess.Models.Application>(appDTO);
+            appDto.name = NormalizeString(appDto.name);
+            DataAccess.Models.Application app = _Service.Mapper().Map<DataAccess.Models.Application>(appDto);
  
             _Context.Set<DataAccess.Models.Application>().Add(app);
             _Context.SaveChanges();

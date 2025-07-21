@@ -1,5 +1,5 @@
 ﻿using System;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.Extensions.Primitives;
 
 namespace Application.IServices
@@ -15,7 +15,7 @@ namespace Application.IServices
         /// </summary>
         /// <param name="request">Datos de la solicitud de autenticación.</param>
         /// <returns>True si la clave, cliente, aplicación y rango de IP son válidos; de lo contrario, false.</returns>
-        bool VerificationKey(RequestDTO request);
+        bool VerificationKey(RequestDto request);
 
         /// <summary>
         /// Verifica si el cliente de Authentica de una organización está autorizado, considerando la validez del Referer,
@@ -24,7 +24,7 @@ namespace Application.IServices
         /// <param name="values">Valores del header Referer de la petición HTTP.</param>
         /// <param name="request">Datos de la solicitud de autenticación.</param>
         /// <returns>True si todos los criterios de autorización se cumplen; de lo contrario, false.</returns>
-        bool VerificationKeyForAuthentica(StringValues values, RequestDTO request);
+        bool VerificationKeyForAuthentica(StringValues values, RequestDto request);
         
         /// <summary>
         /// Verifica si la dirección IP proporcionada se encuentra dentro del rango permitido para la clave API especificada.

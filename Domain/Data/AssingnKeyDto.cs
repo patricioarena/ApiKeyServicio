@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.DTOs
+namespace Domain.Data
 {
-    public class AssingnKeyDTO
+    public class AssingnKeyDto
     {
         public int clientId { get; set; }
         public string ipStart { get; set; }

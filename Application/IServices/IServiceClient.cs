@@ -1,5 +1,5 @@
 ﻿using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using System.Collections.Generic;
 
 namespace Application.IServices
@@ -8,8 +8,8 @@ namespace Application.IServices
     {
         Client GetClientById(int clientId);
         List<Client> GetClients();
-        int Save(ClientDTO clientDTO);
+        int Save(ClientDto clientDto);
         int Disable(int clientId, string revoke_user);
-        bool CreateClientForAuthentica(ClientWithKeyDTO clientDTO);
+        bool CreateClientForAuthentica(ClientWithKeyDto clientDTO);
     }
 }

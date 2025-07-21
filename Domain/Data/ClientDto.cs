@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 #nullable disable
 
-namespace Domain.DTOs
+namespace Domain.Data
 {
-    public class ClientDTO
+    public class ClientDto
     {
         public string client { get; set; }
     }

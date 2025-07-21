@@ -2,7 +2,7 @@
 using Application.IServices;
 using Application.Services;
 using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.IISIntegration;
@@ -42,11 +42,11 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                List<LogDTO> listLogs = ImpersontedControllerAction(_ServiceLogApikeyDB.GetLogs);
+                List<LogDto> listLogs = ImpersontedControllerAction(_ServiceLogApikeyDB.GetLogs);
 
                 string message = "Returned all records!!";
                 _Logger.LogInformation(message);
-                return Ok(new ResponseApi<List<LogDTO>>(HttpStatusCode.OK, message, listLogs));
+                return Ok(new ResponseApi<List<LogDto>>(HttpStatusCode.OK, message, listLogs));
             }
             catch (Exception ex)
             {
@@ -60,11 +60,11 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                List<LogDTO> listLogs = ImpersontedControllerAction(_ServiceLogApikeyDB.ByClient, id);
+                List<LogDto> listLogs = ImpersontedControllerAction(_ServiceLogApikeyDB.ByClient, id);
 
                 string message = $"Returned all record for ::> { id } !!";
                 _Logger.LogInformation(message);
-                return Ok(new ResponseApi<List<LogDTO>>(HttpStatusCode.OK, message, listLogs));
+                return Ok(new ResponseApi<List<LogDto>>(HttpStatusCode.OK, message, listLogs));
             }
             catch (Exception ex)
             {
@@ -78,11 +78,11 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                List<LogDTO> listLogs = ImpersontedControllerAction(_ServiceLogApikeyDB.ByClientKey, apikey);
+                List<LogDto> listLogs = ImpersontedControllerAction(_ServiceLogApikeyDB.ByClientKey, apikey);
 
                 string message = $"Returned all record for ::> { apikey } !!";
                 _Logger.LogInformation(message);
-                return Ok(new ResponseApi<List<LogDTO>>(HttpStatusCode.OK, message, listLogs));
+                return Ok(new ResponseApi<List<LogDto>>(HttpStatusCode.OK, message, listLogs));
             }
             catch (Exception ex)
             {

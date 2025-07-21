@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 #nullable disable
 
-namespace Domain.DTOs
+namespace Domain.Data
 {
-    public class AccessKeyDTO
+    public class AccessKeyDto
     {
         public Guid apiKey { get; set; }
         public int clientId { get; set; }

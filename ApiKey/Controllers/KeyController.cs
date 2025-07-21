@@ -1,7 +1,7 @@
 ﻿using ApiKeyPOC.Results;
 using Application.IServices;
 using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -76,15 +76,15 @@ namespace ApiKeyPOC.Controllers
 
         // Genera una key para un cliente
         [HttpPost("AssignKey")]
-        public IActionResult AssignKey([FromBody] AssingnKeyDTO assingnKeyDTO)
+        public IActionResult AssignKey([FromBody] AssingnKeyDto assingnKeyDto)
         {
             try
             {
-                AssingnedKeyDTO assingnedKey = ImpersontedControllerAction(_ServiceKey.AssignKey, assingnKeyDTO);
+                AssingnedKeyDto assingnedKey = ImpersontedControllerAction(_ServiceKey.AssignKey, assingnKeyDto);
 
                 string message = $"Assigned key ::> { assingnedKey.apiKey } Success!!";
                 _Logger.LogInformation(message);
-                return Ok(new ResponseApi<AssingnedKeyDTO>(HttpStatusCode.OK, message, assingnedKey));
+                return Ok(new ResponseApi<AssingnedKeyDto>(HttpStatusCode.OK, message, assingnedKey));
             }
             catch (Exception ex)
             {
@@ -94,15 +94,15 @@ namespace ApiKeyPOC.Controllers
         }
 
         [HttpPost("Enable")]
-        public IActionResult Enable([FromBody] AccessKeyDTO assingnKeyDTO)
+        public IActionResult Enable([FromBody] AccessKeyDto assingnKeyDto)
         {
             try
             {
-                AssingnedKeyDTO assingnedKey = ImpersontedControllerAction(_ServiceKey.Enable, assingnKeyDTO);
+                AssingnedKeyDto assingnedKey = ImpersontedControllerAction(_ServiceKey.Enable, assingnKeyDto);
 
                 string message = $"Enable key ::> { assingnedKey.apiKey } Success!!";
                 _Logger.LogInformation(message);
-                return Ok(new ResponseApi<AssingnedKeyDTO>(HttpStatusCode.OK, message, assingnedKey));
+                return Ok(new ResponseApi<AssingnedKeyDto>(HttpStatusCode.OK, message, assingnedKey));
             }
             catch (Exception ex)
             {
@@ -132,15 +132,15 @@ namespace ApiKeyPOC.Controllers
         }
 
         [HttpPost("GrantAppAccess")]
-        public IActionResult GrantAppAccess([FromBody] BindDTO bindDTO)
+        public IActionResult GrantAppAccess([FromBody] BindDto bindDto)
         {
             try
             {
-                BindedDTO bindedDTO = ImpersontedControllerAction(_ServiceKey.GrantAppAccess, bindDTO);
+                BindedDto bindedDto = ImpersontedControllerAction(_ServiceKey.GrantAppAccess, bindDto);
 
-                string message = $"Grant app access key ::> { bindedDTO.apiKey } & { bindedDTO.nameApp } Success!!";
+                string message = $"Grant app access key ::> { bindedDto.apiKey } & { bindedDto.nameApp } Success!!";
                 _Logger.LogInformation(message);
-                return Ok(new ResponseApi<BindedDTO>(HttpStatusCode.OK, message, bindedDTO));
+                return Ok(new ResponseApi<BindedDto>(HttpStatusCode.OK, message, bindedDto));
             }
             catch (Exception ex)
             {
@@ -150,15 +150,15 @@ namespace ApiKeyPOC.Controllers
         }
 
         [HttpPost("RevokeAppAccess")]
-        public IActionResult RevokeAppAccess([FromBody] BindDTO bindDTO)
+        public IActionResult RevokeAppAccess([FromBody] BindDto bindDto)
         {
             try
             {
-                BindedDTO bindedDTO = ImpersontedControllerAction(_ServiceKey.RevokeAppAccess, bindDTO, ImpersontedUser());
+                BindedDto bindedDto = ImpersontedControllerAction(_ServiceKey.RevokeAppAccess, bindDto, ImpersontedUser());
 
-                string message = $"Revoke app access key ::> { bindedDTO.apiKey } & { bindedDTO.nameApp } Success!!";
+                string message = $"Revoke app access key ::> { bindedDto.apiKey } & { bindedDto.nameApp } Success!!";
                 _Logger.LogInformation(message);
-                return Ok(new ResponseApi<BindedDTO>(HttpStatusCode.OK, message, bindedDTO));
+                return Ok(new ResponseApi<BindedDto>(HttpStatusCode.OK, message, bindedDto));
             }
             catch (Exception ex)
             {

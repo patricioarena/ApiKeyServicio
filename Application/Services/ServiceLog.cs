@@ -1,7 +1,7 @@
 ﻿using Application.IFactory;
 using Application.IServices;
 using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -22,45 +22,45 @@ namespace Application.Services
             _Service = service;
         }
 
-        public List<LogDTO> GetLogs()
+        public List<LogDto> GetLogs()
         {
             var list = _Context.Set<Log>()
                 .Include(e => e.client)
                 .Include(e => e.application)
                 .ToList();
 
-            List<LogDTO> listLogDTO = _Service.Mapper().Map<List<Log>, List<LogDTO>>(list);
+            List<LogDto> listLogDto = _Service.Mapper().Map<List<Log>, List<LogDto>>(list);
 
-            return listLogDTO;
+            return listLogDto;
         }
 
-        public List<LogDTO> ByClient(int id)
+        public List<LogDto> ByClient(int id)
         {
             var list = _Context.Set<Log>().Where(e => e.clientId.Equals(id))
                 .Include(e => e.client)
                 .Include(e => e.application)
                 .ToList();
 
-            List<LogDTO> listLogDTO = _Service.Mapper().Map<List<Log>, List<LogDTO>>(list);
+            List<LogDto> listLogDto = _Service.Mapper().Map<List<Log>, List<LogDto>>(list);
 
-            return listLogDTO;
+            return listLogDto;
         }
 
-        public List<LogDTO> ByClientKey(Guid key)
+        public List<LogDto> ByClientKey(Guid key)
         {
             var list = _Context.Set<Log>().Where(e => e.apiKey.Equals(key))
                 .Include(e => e.client)
                 .Include(e => e.application)
                 .ToList();
 
-            List<LogDTO> listLogDTO = _Service.Mapper().Map<List<Log>, List<LogDTO>>(list);
+            List<LogDto> listLogDto = _Service.Mapper().Map<List<Log>, List<LogDto>>(list);
 
-            return listLogDTO;
+            return listLogDto;
         }
 
 
 
-        public int LogDb(RequestDTO request, string descriptionError)
+        public int LogDb(RequestDto request, string descriptionError)
         {
             Log o = new Log()
             {

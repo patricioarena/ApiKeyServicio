@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.DTOs
+namespace Domain.Data
 {
-    public class LogDTO
+    public class LogDto
     {
         public int id { get; set; }
         public string clientName { get; set; }

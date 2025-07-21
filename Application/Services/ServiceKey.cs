@@ -1,7 +1,7 @@
 ﻿using Application.IFactory;
 using Application.IServices;
 using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -57,15 +57,15 @@ namespace Application.Services
         // La key se genera automaticamente en la base de datos 
         // por defecto esta desactivada la debe dar de alta una persona
         // a futuro un proceso
-        public AssingnedKeyDTO AssignKey(AssingnKeyDTO assignKeyDTO)
+        public AssingnedKeyDto AssignKey(AssingnKeyDto assignKeyDto)
         {
-            Key key = _Service.Mapper().Map<Key>(assignKeyDTO);
+            Key key = _Service.Mapper().Map<Key>(assignKeyDto);
             _Context.Set<Key>().Add(key);
             _Context.SaveChanges();
 
             Key assingnedKey = _Context.Set<Key>().Where(e => e.id.Equals(key.id)).Include(e => e.client).FirstOrDefault();
 
-            AssingnedKeyDTO assingnedKeyDTO = new AssingnedKeyDTO
+            AssingnedKeyDto assingnedKeyDto = new AssingnedKeyDto
             {
                 clientId = assingnedKey.clientId,
                 clientName = assingnedKey.client.client1,
@@ -75,18 +75,18 @@ namespace Application.Services
                 enabled = assingnedKey.enabled
             };
 
-            return assingnedKeyDTO;
+            return assingnedKeyDto;
         }
         
-        public AssingnedKeyDTO Enable(AccessKeyDTO accessKeyDTO)
+        public AssingnedKeyDto Enable(AccessKeyDto accessKeyDto)
         {
-            Guid guidKey = accessKeyDTO.apiKey;
+            Guid guidKey = accessKeyDto.apiKey;
             Key key = _Context.Set<Key>().Where(e => e.apiKey.Equals(guidKey)).Include(e => e.client).FirstOrDefault();
 
             if (key == null)
                 throw new NullReferenceException($"Apikey: { guidKey } is null or no exit");
 
-            int clientId = accessKeyDTO.clientId;
+            int clientId = accessKeyDto.clientId;
             var client = _Context.Set<Client>().FirstOrDefault(e => e.id.Equals(clientId));
 
             if (client == null)
@@ -102,7 +102,7 @@ namespace Application.Services
 
             Key assingnedKey = _Context.Set<Key>().Where(e => e.id.Equals(key.id)).Include(e => e.client).FirstOrDefault();
 
-            AssingnedKeyDTO assingnedKeyDTO = new AssingnedKeyDTO
+            AssingnedKeyDto assingnedKeyDto = new AssingnedKeyDto
             {
                 clientId = assingnedKey.clientId,
                 clientName = assingnedKey.client.client1,
@@ -112,7 +112,7 @@ namespace Application.Services
                 enabled = assingnedKey.enabled
             };
 
-            return assingnedKeyDTO;
+            return assingnedKeyDto;
         }
         
         public int Disable(Guid key, string revoke_user)
@@ -129,15 +129,15 @@ namespace Application.Services
             return _Context.SaveChanges();
         }
 
-        public BindedDTO GrantAppAccess(BindDTO bindDTO)
+        public BindedDto GrantAppAccess(BindDto bindDto)
         {
-            Guid guidKey = bindDTO.apiKey;
+            Guid guidKey = bindDto.apiKey;
             Key key = _Context.Set<Key>().Where(e => e.apiKey.Equals(guidKey)).Include(e => e.client).FirstOrDefault();
 
             if (key == null)
                 throw new NullReferenceException($"Apikey: { guidKey } is null or no exit");
 
-            int appId = bindDTO.applicationId;
+            int appId = bindDto.applicationId;
             DataAccess.Models.Application app = _Context
                 .Set<DataAccess.Models.Application>().FirstOrDefault(e => e.id.Equals(appId));
 
@@ -157,7 +157,7 @@ namespace Application.Services
             _Context.Set<Key_Application>().Add(key_Application);
             _Context.SaveChanges();
 
-            BindedDTO bindedDTO = new BindedDTO
+            BindedDto bindedDto = new BindedDto
             {
                 apiKey = guidKey,
                 clientName = key.client.client1,
@@ -165,18 +165,18 @@ namespace Application.Services
                 enabled = key_Application.enabled,
             };
 
-            return bindedDTO;
+            return bindedDto;
         }
 
-        public BindedDTO RevokeAppAccess(BindDTO bindDTO, string revoke_user)
+        public BindedDto RevokeAppAccess(BindDto bindDto, string revoke_user)
         {
-            Guid guidKey = bindDTO.apiKey;
+            Guid guidKey = bindDto.apiKey;
             Key key = _Context.Set<Key>().Where(e => e.apiKey.Equals(guidKey)).Include(e => e.client).FirstOrDefault();
 
             if (key == null)
                 throw new NullReferenceException($"Apikey: { guidKey } is null or no exit");
 
-            int appId = bindDTO.applicationId;
+            int appId = bindDto.applicationId;
             DataAccess.Models.Application app = _Context.Set<DataAccess.Models.Application>().FirstOrDefault(e => e.id.Equals(appId));
 
             if (app == null)
@@ -197,7 +197,7 @@ namespace Application.Services
             _Context.Entry(key_Application).State = EntityState.Modified;
             _Context.SaveChanges();
 
-            BindedDTO bindedDTO = new BindedDTO
+            BindedDto bindedDto = new BindedDto
             {
                 apiKey = guidKey,
                 clientName = key.client.client1,
@@ -205,7 +205,7 @@ namespace Application.Services
                 enabled = key_Application.enabled
             };
 
-            return bindedDTO;
+            return bindedDto;
         }
 
     }

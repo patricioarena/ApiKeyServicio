@@ -1,5 +1,5 @@
 ﻿using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using System;
 using System.Collections.Generic;
 
@@ -9,10 +9,10 @@ namespace Application.IServices
     {
         List<Key> GetKeys();
         Key GetKey(int id);
-        AssingnedKeyDTO AssignKey(AssingnKeyDTO assignKeyDTO);
-        AssingnedKeyDTO Enable(AccessKeyDTO accessKeyDTO);
+        AssingnedKeyDto AssignKey(AssingnKeyDto assignKeyDto);
+        AssingnedKeyDto Enable(AccessKeyDto accessKeyDto);
         int Disable(Guid key, string revoke_user);
-        BindedDTO GrantAppAccess(BindDTO bindDTO);
-        BindedDTO RevokeAppAccess(BindDTO bindDTO, string revoke_user);
+        BindedDto GrantAppAccess(BindDto bindDto);
+        BindedDto RevokeAppAccess(BindDto bindDto, string revoke_user);
     }
 }

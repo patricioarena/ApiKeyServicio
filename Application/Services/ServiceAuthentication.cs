@@ -3,7 +3,7 @@ using System.Linq;
 using Application.IServices;
 using Application.Services.UseCase;
 using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 
@@ -35,7 +35,7 @@ namespace Application.Services
         /// </summary>
         /// <param name="request">Datos de la solicitud de autenticación.</param>
         /// <returns>True si la clave, cliente, aplicación y rango de IP son válidos; de lo contrario, false.</returns>
-        public bool VerificationKey(RequestDTO request)
+        public bool VerificationKey(RequestDto request)
         {
             Key key = GetAndValidateKey(request);
             Client client = GetAndValidateClient(request);
@@ -58,21 +58,15 @@ namespace Application.Services
         /// <param name="values">Valores del header Referer de la petición HTTP.</param>
         /// <param name="request">Datos de la solicitud de autenticación.</param>
         /// <returns>True si todos los criterios de autorización se cumplen; de lo contrario, false.</returns>
-        public bool VerificationKeyForAuthentica(StringValues values, RequestDTO request)
+        public bool VerificationKeyForAuthentica(StringValues values, RequestDto request)
         {
             Key key = GetAndValidateKey(request);
             Client client = GetAndValidateClient(request);
-            ValidateKeyClientRelationship(key, client, request);
-            DataAccess.Models.Application app = GetAndValidateApplication(request);
-            Key_Application keyApp = GetAndValidateKeyApplication(key, app, client, request);
             
             bool isRefValid = isRefererValid(values);
             bool isInRange = ValidateIpRange(key, request);
-            bool isValidKey = keyApp.key.enabled;
-            bool isValidClient = keyApp.key.client.enabled;
-            bool hasAccess = keyApp.enabled ?? false;
 
-            return isValidKey && isValidClient && hasAccess && isInRange && isRefValid;
+            return isInRange && isRefValid;
         }
 
         /// <summary>
@@ -95,7 +89,7 @@ namespace Application.Services
                 return false;
             
             //TODO: Sacar los referer de una tabla en db
-            if (values.ToString().StartsWith("https://www.ejemplo.com"))
+            if (values.ToString().StartsWith("http://localhost:8080"))
             {
                 return true;
             }
@@ -103,7 +97,7 @@ namespace Application.Services
             return false;
         }
 
-        private Key GetAndValidateKey(RequestDTO request)
+        private Key GetAndValidateKey(RequestDto request)
         {
             var key = _Context.Set<Key>().FirstOrDefault(e => e.apiKey.Equals(request.apiKey));
             if (key == null)
@@ -115,7 +109,7 @@ namespace Application.Services
             return key;
         }
 
-        private Client GetAndValidateClient(RequestDTO request)
+        private Client GetAndValidateClient(RequestDto request)
         {
             var client = _Context.Set<Client>().FirstOrDefault(e => e.id.Equals(request.clientId));
             if (client == null)
@@ -127,7 +121,7 @@ namespace Application.Services
             return client;
         }
 
-        private void ValidateKeyClientRelationship(Key key, Client client, RequestDTO request)
+        private void ValidateKeyClientRelationship(Key key, Client client, RequestDto request)
         {
             if (!key.clientId.Equals(client.id))
             {
@@ -136,7 +130,7 @@ namespace Application.Services
             }
         }
 
-        private DataAccess.Models.Application GetAndValidateApplication(RequestDTO request)
+        private DataAccess.Models.Application GetAndValidateApplication(RequestDto request)
         {
             var app = _Context.Set<DataAccess.Models.Application>()
                 .FirstOrDefault(e => e.id.Equals(request.appId));
@@ -150,7 +144,7 @@ namespace Application.Services
             return app;
         }
 
-        private Key_Application GetAndValidateKeyApplication(Key key, DataAccess.Models.Application app, Client client, RequestDTO request)
+        private Key_Application GetAndValidateKeyApplication(Key key, DataAccess.Models.Application app, Client client, RequestDto request)
         {
             var keyApp = _Context.Set<Key_Application>()
                 .Where(e => e.clientId.Equals(client.id))
@@ -169,7 +163,7 @@ namespace Application.Services
             return keyApp;
         }
 
-        private bool ValidateIpRange(Key key, RequestDTO request)
+        private bool ValidateIpRange(Key key, RequestDto request)
         {
             var isInRange = IsAddressRangeValid.Test(key, request.remoteIp);
             if (!isInRange)

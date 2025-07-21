@@ -1,4 +1,4 @@
-﻿using Domain.DTOs;
+﻿using Domain.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +11,6 @@ namespace Application.Services
     {
         DataAccess.Models.Application GetAppById(int appId);
         List<DataAccess.Models.Application> GetApps();
-        int Save(ApplicationDTO app);
+        int Save(ApplicationDto app);
     }
 }

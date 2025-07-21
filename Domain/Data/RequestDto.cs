@@ -4,11 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.DTOs
+namespace Domain.Data
 {
-    public class BindDTO
+    public class RequestDto
     {
+        public int appId { get; set; }
+        public int clientId { get; set; }
         public Guid apiKey { get; set; }
-        public int applicationId { get; set; }
+        public string remoteIp { get; set; }
     }
 }

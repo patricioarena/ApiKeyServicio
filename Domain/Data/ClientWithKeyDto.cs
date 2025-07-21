@@ -1,6 +1,6 @@
-﻿namespace Domain.DTOs
+﻿namespace Domain.Data
 {
-    public class ClientWithKeyDTO
+    public class ClientWithKeyDto
     {
         public string client { get; set; }
         public string ipStart { get; set; }

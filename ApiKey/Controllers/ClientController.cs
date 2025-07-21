@@ -1,18 +1,14 @@
-﻿using ApiKeyPOC.Results;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using ApiKeyPOC.Results;
 using Application.IServices;
 using DataAccess.Models;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Security.Principal;
-using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -57,7 +53,7 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                Client client = ImpersontedControllerAction(_ServiceClient.GetClientById,id);
+                Client client = ImpersontedControllerAction(_ServiceClient.GetClientById, id);
 
                 string message = $"Returned record ::> { id } !!";
                 _Logger.LogInformation(message);
@@ -71,11 +67,11 @@ namespace ApiKeyPOC.Controllers
         }
 
         [HttpPost("Register")]
-        public IActionResult SetClient([FromBody] ClientDTO clientDTO)
+        public IActionResult SetClient([FromBody] ClientDto clientDto)
         {
             try
             {
-                int? id = ImpersontedControllerAction(_ServiceClient.Save, clientDTO);
+                int? id = ImpersontedControllerAction(_ServiceClient.Save, clientDto);
                 JObject row_affected = new JObject();
                 row_affected.Add("id", id);
 

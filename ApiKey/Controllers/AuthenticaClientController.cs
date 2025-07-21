@@ -2,7 +2,7 @@
 using System.Net;
 using ApiKeyPOC.Results;
 using Application.IServices;
-using Domain.DTOs;
+using Domain.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -44,18 +44,18 @@ namespace ApiKeyPOC.Controllers
             try
             {
                 ConnectionInfo connectionInfo = _Accessor.HttpContext.Connection;
-                RequestDTO requestDTO = new RequestDTO
+                RequestDto requestDto = new RequestDto
                 {
                     appId = 1,
                     clientId = clientId,
-                    apiKey = new Guid("56ae433e-f36b-1410-89dd-007170650b78"),
+                    apiKey = new Guid("63AE433E-F36B-1410-89DD-007170650B78"),
                     remoteIp = connectionInfo.RemoteIpAddress.MapToIPv4().ToString(),
                 };
 
                 bool isValid = false;
                 if (_Accessor.HttpContext.Request.Headers.TryGetValue(Referer, out StringValues values))
                 {
-                     isValid = _ServiceAuthentication.VerificationKeyForAuthentica(values, requestDTO);
+                     isValid = _ServiceAuthentication.VerificationKeyForAuthentica(values, requestDto);
                 }
 
                 JObject row_affected = new JObject();
@@ -73,7 +73,7 @@ namespace ApiKeyPOC.Controllers
         }
         
         [HttpPost("Register")]
-        public IActionResult SetClient([FromBody] ClientWithKeyDTO clientDTO)
+        public IActionResult SetClient([FromBody] ClientWithKeyDto clientDTO)
         {
             try
             {
