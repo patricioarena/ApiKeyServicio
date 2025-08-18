@@ -22,7 +22,8 @@ namespace DataAccess.Models
         public virtual DbSet<Key> Keys { get; set; }
         public virtual DbSet<Key_Application> Key_Applications { get; set; }
         public virtual DbSet<Log> Logs { get; set; }
-
+        public virtual DbSet<Referer> Referer { get; set; }
+        
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -54,11 +55,11 @@ namespace DataAccess.Models
             {
                 entity.ToTable("Client", "ApiKey");
 
-                entity.Property(e => e.client1)
+                entity.Property(e => e.name)
                     .IsRequired()
                     .HasMaxLength(50)
                     .IsUnicode(false)
-                    .HasColumnName("client");
+                    .HasColumnName("name");
 
                 entity.Property(e => e.created)
                     .HasColumnType("datetime")
@@ -95,14 +96,6 @@ namespace DataAccess.Models
                     .IsUnicode(false)
                     .HasDefaultValueSql("(suser_sname())");
 
-                entity.Property(e => e.ipEnd)
-                    .HasMaxLength(15)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ipStart)
-                    .HasMaxLength(15)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.revoke_user)
                     .HasMaxLength(30)
                     .IsUnicode(false);
@@ -112,6 +105,25 @@ namespace DataAccess.Models
                     .HasForeignKey(d => d.clientId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Key_Client");
+            });
+            
+            modelBuilder.Entity<Referer>(entity =>
+            {
+                entity.ToTable("Referer", "ApiKey");
+
+                entity.Property(e => e.enabled).HasDefaultValueSql("((0))");
+                
+                entity.Property(e => e.ipEnd)
+                    .HasMaxLength(15)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ipStart)
+                    .HasMaxLength(15)
+                    .IsUnicode(false);
+                
+                entity.Property(e => e.name)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<Key_Application>(entity =>

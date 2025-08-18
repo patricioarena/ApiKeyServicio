@@ -28,14 +28,14 @@ namespace ApiKeyPOC.Controllers
     [Route("api/[controller]")]
     public class KeyController : CustomController
     {
-        private readonly ILogger<KeyController> _Logger;
-        private readonly IServiceKey _ServiceKey;
-        private readonly IHttpContextAccessor _Accessor;
+        private readonly ILogger<KeyController> _logger;
+        private readonly IServiceKey _serviceKey;
+        private readonly IHttpContextAccessor _accessor;
         public KeyController(IHttpContextAccessor accessor, IServiceKey service, ILogger<KeyController> logger)
         {
-            _Logger = logger;
-            _ServiceKey = service;
-            _Accessor = accessor;
+            _logger = logger;
+            _serviceKey = service;
+            _accessor = accessor;
         }
 
         [HttpGet("All")]
@@ -43,15 +43,15 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                List<Key> listKeys = ImpersontedControllerAction(_ServiceKey.GetKeys);
+                List<Key> listKeys = ImpersontedControllerAction(_serviceKey.GetKeys);
 
                 string message = "Returned all records!!";
-                _Logger.LogInformation(message);
+                _logger.LogInformation(message);
                 return Ok(new ResponseApi<List<Key>>(HttpStatusCode.OK, message, listKeys));
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
             }
         }
@@ -61,15 +61,15 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                Key key = ImpersontedControllerAction(_ServiceKey.GetKey,id);
+                Key key = ImpersontedControllerAction(_serviceKey.GetKey,id);
 
                 string message = $"Returned key ::> { key.apiKey } Success!!";
-                _Logger.LogInformation(message);
+                _logger.LogInformation(message);
                 return Ok(new ResponseApi<Key>(HttpStatusCode.OK, message, key));
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
             }
         }
@@ -80,15 +80,15 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                AssingnedKeyDto assingnedKey = ImpersontedControllerAction(_ServiceKey.AssignKey, assingnKeyDto);
+                AssingnedKeyDto assingnedKey = ImpersontedControllerAction(_serviceKey.AssignKey, assingnKeyDto);
 
                 string message = $"Assigned key ::> { assingnedKey.apiKey } Success!!";
-                _Logger.LogInformation(message);
+                _logger.LogInformation(message);
                 return Ok(new ResponseApi<AssingnedKeyDto>(HttpStatusCode.OK, message, assingnedKey));
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
             }
         }
@@ -98,15 +98,15 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                AssingnedKeyDto assingnedKey = ImpersontedControllerAction(_ServiceKey.Enable, assingnKeyDto);
+                AssingnedKeyDto assingnedKey = ImpersontedControllerAction(_serviceKey.Enable, assingnKeyDto);
 
                 string message = $"Enable key ::> { assingnedKey.apiKey } Success!!";
-                _Logger.LogInformation(message);
+                _logger.LogInformation(message);
                 return Ok(new ResponseApi<AssingnedKeyDto>(HttpStatusCode.OK, message, assingnedKey));
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
             }
         }
@@ -116,17 +116,17 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                int? number = ImpersontedControllerAction(_ServiceKey.Disable, key, ImpersontedUser());
+                int? number = ImpersontedControllerAction(_serviceKey.Disable, key, ImpersontedUser());
                 JObject row_affected = new JObject();
                 row_affected.Add("Row affected", number);
 
                 string message = $"Revoke key ::> { key } Success!!";
-                _Logger.LogInformation(message);
+                _logger.LogInformation(message);
                 return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, row_affected));
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
             }
         }
@@ -136,15 +136,15 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                BindedDto bindedDto = ImpersontedControllerAction(_ServiceKey.GrantAppAccess, bindDto);
+                BindedDto bindedDto = ImpersontedControllerAction(_serviceKey.GrantAppAccess, bindDto);
 
                 string message = $"Grant app access key ::> { bindedDto.apiKey } & { bindedDto.nameApp } Success!!";
-                _Logger.LogInformation(message);
+                _logger.LogInformation(message);
                 return Ok(new ResponseApi<BindedDto>(HttpStatusCode.OK, message, bindedDto));
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
             }
         }
@@ -154,15 +154,15 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                BindedDto bindedDto = ImpersontedControllerAction(_ServiceKey.RevokeAppAccess, bindDto, ImpersontedUser());
+                BindedDto bindedDto = ImpersontedControllerAction(_serviceKey.RevokeAppAccess, bindDto, ImpersontedUser());
 
                 string message = $"Revoke app access key ::> { bindedDto.apiKey } & { bindedDto.nameApp } Success!!";
-                _Logger.LogInformation(message);
+                _logger.LogInformation(message);
                 return Ok(new ResponseApi<BindedDto>(HttpStatusCode.OK, message, bindedDto));
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
             }
         }

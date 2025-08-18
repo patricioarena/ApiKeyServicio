@@ -7,6 +7,6 @@ namespace Domain.Data
 {
     public class ClientDto
     {
-        public string client { get; set; }
+        public string clientName { get; set; }
     }
 }

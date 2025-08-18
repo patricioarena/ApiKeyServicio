@@ -14,7 +14,7 @@ namespace DataAccess.Models
         }
 
         public int id { get; set; }
-        public string client1 { get; set; }
+        public string name { get; set; }
         public DateTime created { get; set; }
         public DateTime? dischargeDate { get; set; }
         public bool enabled { get; set; }

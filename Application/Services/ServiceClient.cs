@@ -1,4 +1,4 @@
-﻿using Application.IFactory;
+using Application.IFactory;
 using Application.IServices;
 using DataAccess.Models;
 using Domain.Data;
@@ -35,7 +35,7 @@ namespace Application.Services
 
         public int Save(ClientDto clientDto)
         {
-            clientDto.client = NormalizeString(clientDto.client);
+            clientDto.clientName = NormalizeString(clientDto.clientName);
             Client client = _Service.Mapper().Map<Client>(clientDto);
             client.enabled = true;
 
@@ -66,8 +66,8 @@ namespace Application.Services
                 try
                 {
                     // Crear el cliente
-                    ClientDto clientDto = new ClientDto { client = reqDto.client };
-                    clientDto.client = NormalizeString(clientDto.client);
+                    ClientDto clientDto = new ClientDto { clientName = reqDto.clientName };
+                    clientDto.clientName = NormalizeString(clientDto.clientName);
                     
                     Client client = _Service.Mapper().Map<Client>(clientDto);
                     client.enabled = true;
@@ -83,10 +83,13 @@ namespace Application.Services
                         referer = reqDto.referer
                     };
                     
-                    Key key = _Service.Mapper().Map<Key>(assingnKeyDto);
-                    _Context.Set<Key>().Add(key);
+                    Referer referer = _Service.Mapper().Map<Referer>(assingnKeyDto);
+                    referer.enabled = true;
+                    referer.clientId = client.id;
+                    
+                    _Context.Set<Referer>().Add(referer);
                     _Context.SaveChanges();
-
+                    
                     // Commit de la transacción
                     transaction.Commit();
                     return true;

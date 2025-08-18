@@ -18,9 +18,9 @@ namespace ApiKeyPOC.Controllers
     [Route("api/[controller]")]
     public class AuthenticationController : CustomController
     {
-        private readonly ILogger<AuthenticationController> _Logger;
+        private readonly ILogger<AuthenticationController> _logger;
         
-        private readonly IServiceAuthentication _ServiceAuthentication;
+        private readonly IServiceAuthentication _serviceAuthentication;
         
         /// <summary>
         /// Inicializa una nueva instancia del controlador de autenticación.
@@ -29,10 +29,11 @@ namespace ApiKeyPOC.Controllers
         /// <param name="logger">Logger para registrar eventos y errores.</param>
         public AuthenticationController(IServiceAuthentication service, ILogger<AuthenticationController> logger)
         {
-            _Logger = logger;
-            _ServiceAuthentication = service;
+            _logger = logger;
+            _serviceAuthentication = service;
         }
         
+        //TODO: revisar logica de este endpoint
         /// <summary>
         /// Verifica la autenticidad de una API Key recibida en el cuerpo de la solicitud.
         /// </summary>
@@ -44,18 +45,18 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                bool isValid = _ServiceAuthentication.VerificationKey(requestDto);
+                bool isValid = _serviceAuthentication.VerificationKey(requestDto);
 
-                JObject row_affected = new JObject();
-                row_affected.Add("isValid", isValid);
+                JObject responseData = new JObject();
+                responseData.Add("isValid", isValid);
 
                 string message = $"Verification Key ::> { isValid } !!";
-                _Logger.LogInformation(message);
-                return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, row_affected));
+                _logger.LogInformation(message);
+                return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, responseData));
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
             }
         }
@@ -67,18 +68,18 @@ namespace ApiKeyPOC.Controllers
         {
             try
             {
-                bool isValid = _ServiceAuthentication.IsInRange(apikey, remoteIp);
+                bool isValid = _serviceAuthentication.IsInRange(apikey, remoteIp);
 
-                JObject row_affected = new JObject();
-                row_affected.Add("IsInRange", isValid);
+                JObject responseData = new JObject();
+                responseData.Add("IsInRange", isValid);
                 
                 string message = $"Is In Range ::> { isValid } !!";
-                _Logger.LogInformation(message);
-                return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, row_affected));
+                _logger.LogInformation(message);
+                return Ok(new ResponseApi<JObject>(HttpStatusCode.OK, message, responseData));
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex.Message);
+                _logger.LogError(ex.Message);
                 return CustomErrorStatusCode(ex);
             }
         }

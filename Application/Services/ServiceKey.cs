@@ -68,10 +68,8 @@ namespace Application.Services
             AssingnedKeyDto assingnedKeyDto = new AssingnedKeyDto
             {
                 clientId = assingnedKey.clientId,
-                clientName = assingnedKey.client.client1,
+                clientName = assingnedKey.client.name,
                 apiKey = assingnedKey.apiKey,
-                ipStart = assingnedKey.ipStart,
-                ipEnd = assingnedKey.ipEnd,
                 enabled = assingnedKey.enabled
             };
 
@@ -105,10 +103,8 @@ namespace Application.Services
             AssingnedKeyDto assingnedKeyDto = new AssingnedKeyDto
             {
                 clientId = assingnedKey.clientId,
-                clientName = assingnedKey.client.client1,
+                clientName = assingnedKey.client.name,
                 apiKey = assingnedKey.apiKey,
-                ipStart = assingnedKey.ipStart,
-                ipEnd = assingnedKey.ipEnd,
                 enabled = assingnedKey.enabled
             };
 
@@ -160,7 +156,7 @@ namespace Application.Services
             BindedDto bindedDto = new BindedDto
             {
                 apiKey = guidKey,
-                clientName = key.client.client1,
+                clientName = key.client.name,
                 nameApp = app.name,
                 enabled = key_Application.enabled,
             };
@@ -200,7 +196,7 @@ namespace Application.Services
             BindedDto bindedDto = new BindedDto
             {
                 apiKey = guidKey,
-                clientName = key.client.client1,
+                clientName = key.client.name,
                 nameApp = app.name,
                 enabled = key_Application.enabled
             };

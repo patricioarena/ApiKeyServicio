@@ -20,8 +20,6 @@ namespace DataAccess.Models
         public bool enabled { get; set; }
         public string emiter_user { get; set; }
         public string revoke_user { get; set; }
-        public string ipStart { get; set; }
-        public string ipEnd { get; set; }
 
         public virtual Client client { get; set; }
         public virtual ICollection<Key_Application> Key_Applications { get; set; }

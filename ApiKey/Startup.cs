@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using ApiKeyPOC.Configs;
 using Application;
 using Application.Factory;
 using Application.IFactory;
@@ -45,6 +46,8 @@ namespace ApiKeyPOC
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IAuthenticaConfig, AuthenticaConfig>();
+            
             services.AddScoped<IServiceAuthentication, ServiceAuthentication>();
             services.AddScoped<IServiceApplication, ServiceApplication>();
             services.AddScoped<IServiceGeneral, ServiceGeneral>();

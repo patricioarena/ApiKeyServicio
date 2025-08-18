@@ -1,10 +1,10 @@
-﻿namespace Domain.Data
+namespace Domain.Data
 {
     public class ClientWithKeyDto
     {
-        public string client { get; set; }
-        public string ipStart { get; set; }
-        public string ipEnd { get; set; }
+        public string clientName { get; set; }
+        public string ipStart { get; set; } = "0.0.0.0";
+        public string ipEnd { get; set; }  = "0.0.0.0";
         public string referer { get; set; }
     }
 }

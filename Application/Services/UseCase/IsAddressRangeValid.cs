@@ -7,15 +7,15 @@ namespace Application.Services.UseCase
 {
     public static class IsAddressRangeValid
     {
-        public static bool Test(Key key, string address)
+        public static bool Test(Referer referer, string address)
         {
-            if (key == null)
-                throw new NullReferenceException(Message.null_Key);
+            if (referer == null)
+                throw new NullReferenceException(Message.null_Referer);
 
-            if ((key.ipStart == null) || (key.ipEnd == null))
+            if ((referer.ipStart == null) || (referer.ipEnd == null))
                 throw new NullReferenceException(Message.null_ip);
 
-            return IsAddressInRange(key.ipStart, key.ipEnd, address);
+            return IsAddressInRange(referer.ipStart, referer.ipEnd, address);
         }
         
         private static bool IsAddressInRange(string startIpAddr, string endIpAddr, string address)

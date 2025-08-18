@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
+using ApiKeyPOC.Configs;
 using Application.IServices;
 using Application.Services.UseCase;
 using DataAccess.Models;
 using Domain.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
 
 namespace Application.Services
@@ -15,19 +17,22 @@ namespace Application.Services
     /// </summary>
     public class ServiceAuthentication : IServiceAuthentication
     {
-        private readonly DbContext _Context;
+        private readonly DbContext _context;
 
-        private readonly IServiceLogApikeyDB _ServiceLogApikeyDB;
+        private readonly IServiceLogApikeyDB _serviceLogApikeyDb;
+        
+        private readonly IAuthenticaConfig _authenticaConfig;
 
         /// <summary>
         /// Inicializa una nueva instancia del servicio de autenticación.
         /// </summary>
         /// <param name="context">Contexto de base de datos para acceder a los datos.</param>
         /// <param name="serviceLog">Servicio para registrar logs de autenticación.</param>
-        public ServiceAuthentication(ApiKeyDbContext context, IServiceLogApikeyDB serviceLog)
+        public ServiceAuthentication(ApiKeyDbContext context, IServiceLogApikeyDB serviceLog, IAuthenticaConfig  authenticaConfig)
         {
-            _Context = context;
-            _ServiceLogApikeyDB = serviceLog;
+            _context = context;
+            _serviceLogApikeyDb = serviceLog;
+            _authenticaConfig = authenticaConfig;
         }
 
         /// <summary>
@@ -38,12 +43,14 @@ namespace Application.Services
         public bool VerificationKey(RequestDto request)
         {
             Key key = GetAndValidateKey(request);
-            Client client = GetAndValidateClient(request);
+            Client client = GetClient(request);
             ValidateKeyClientRelationship(key, client, request);
             DataAccess.Models.Application app = GetAndValidateApplication(request);
             Key_Application keyApp = GetAndValidateKeyApplication(key, app, client, request);
+            Referer referer = _context.Set<Referer>().FirstOrDefault(e => e.clientId.Equals(key.id));
 
-            bool isInRange = ValidateIpRange(key, request);
+            
+            bool isInRange = ValidateIpRange(referer, request);
             bool isValidKey = keyApp.key.enabled;
             bool isValidClient = keyApp.key.client.enabled;
             bool hasAccess = keyApp.enabled ?? false;
@@ -60,12 +67,14 @@ namespace Application.Services
         /// <returns>True si todos los criterios de autorización se cumplen; de lo contrario, false.</returns>
         public bool VerificationKeyForAuthentica(StringValues values, RequestDto request)
         {
-            Key key = GetAndValidateKey(request);
-            Client client = GetAndValidateClient(request);
+            Client client = GetClient(request);
+            Referer referer = _context.Set<Referer>().Where(e => e.clientId.Equals(client.id)).FirstOrDefault();
             
-            bool isRefValid = isRefererValid(values);
-            bool isInRange = ValidateIpRange(key, request);
-
+            bool isRefValid = isRefererValid(referer, values);
+            bool isInRange = _authenticaConfig.ValidRangeOn() ? 
+                ValidateIpRange(referer, request) : 
+                true;
+            
             return isInRange && isRefValid && client.enabled;
         }
 
@@ -78,43 +87,43 @@ namespace Application.Services
         public bool IsInRange(Guid apiKey, string address)
         {
             Guid guidKey = apiKey;
-            Key key = _Context.Set<Key>().FirstOrDefault(e => e.apiKey.Equals(guidKey));
+            Key key = _context.Set<Key>().FirstOrDefault(e => e.apiKey.Equals(guidKey));
+            Referer referer = _context.Set<Referer>().FirstOrDefault(e => e.clientId.Equals(key.id));
 
-            return IsAddressRangeValid.Test(key, address);
+            return IsAddressRangeValid.Test(referer, address);
         }
         
-        private bool isRefererValid(StringValues values)
+        private bool isRefererValid(Referer referer, StringValues values)   
         {
-            if (string.IsNullOrEmpty(values)) 
+            if (string.IsNullOrEmpty(values))
+                return false;
+
+            if (referer == null)
                 return false;
             
-            //TODO: Sacar los referer de una tabla en db
-            if (values.ToString().StartsWith("http://localhost:8080"))
-            {
+            if (values.ToString().StartsWith(referer.name) && referer.enabled)
                 return true;
-            }
-
             return false;
         }
 
         private Key GetAndValidateKey(RequestDto request)
         {
-            var key = _Context.Set<Key>().FirstOrDefault(e => e.apiKey.Equals(request.apiKey));
+            var key = _context.Set<Key>().FirstOrDefault(e => e.apiKey.Equals(request.apiKey));
             if (key == null)
             {
-                _ServiceLogApikeyDB.LogDb(request, Message.null_Key);
+                _serviceLogApikeyDb.LogDb(request, Message.null_Key);
                 throw new NullReferenceException(Message.null_Key);
             }
 
             return key;
         }
 
-        private Client GetAndValidateClient(RequestDto request)
+        private Client GetClient(RequestDto request)
         {
-            var client = _Context.Set<Client>().FirstOrDefault(e => e.id.Equals(request.clientId));
+            var client = _context.Set<Client>().FirstOrDefault(e => e.id.Equals(request.clientId));
             if (client == null)
             {
-                _ServiceLogApikeyDB.LogDb(request, Message.null_Client);
+                _serviceLogApikeyDb.LogDb(request, Message.null_Client);
                 throw new NullReferenceException(Message.null_Client);
             }
 
@@ -125,19 +134,19 @@ namespace Application.Services
         {
             if (!key.clientId.Equals(client.id))
             {
-                _ServiceLogApikeyDB.LogDb(request, Message.null_relationship);
+                _serviceLogApikeyDb.LogDb(request, Message.null_relationship);
                 throw new NullReferenceException(Message.null_relationship);
             }
         }
 
         private DataAccess.Models.Application GetAndValidateApplication(RequestDto request)
         {
-            var app = _Context.Set<DataAccess.Models.Application>()
+            var app = _context.Set<DataAccess.Models.Application>()
                 .FirstOrDefault(e => e.id.Equals(request.appId));
             
             if (app == null)
             {
-                _ServiceLogApikeyDB.LogDb(request, Message.null_App);
+                _serviceLogApikeyDb.LogDb(request, Message.null_App);
                 throw new NullReferenceException(Message.null_App);
             }
 
@@ -146,7 +155,7 @@ namespace Application.Services
 
         private Key_Application GetAndValidateKeyApplication(Key key, DataAccess.Models.Application app, Client client, RequestDto request)
         {
-            var keyApp = _Context.Set<Key_Application>()
+            var keyApp = _context.Set<Key_Application>()
                 .Where(e => e.clientId.Equals(client.id))
                 .Where(e => e.applicationId.Equals(app.id))
                 .Where(e => e.keyId.Equals(key.id))
@@ -156,18 +165,18 @@ namespace Application.Services
 
             if (keyApp == null)
             {
-                _ServiceLogApikeyDB.LogDb(request, Message.null_relationship2);
+                _serviceLogApikeyDb.LogDb(request, Message.null_relationship2);
                 throw new NullReferenceException(Message.null_relationship2);
             }
 
             return keyApp;
         }
 
-        private bool ValidateIpRange(Key key, RequestDto request)
+        private bool ValidateIpRange(Referer referer, RequestDto request)
         {
-            var isInRange = IsAddressRangeValid.Test(key, request.remoteIp);
+            var isInRange = IsAddressRangeValid.Test(referer, request.remoteIp);
             if (!isInRange)
-                _ServiceLogApikeyDB.LogDb(request, Message.ip_out_range);
+                _serviceLogApikeyDb.LogDb(request, Message.ip_out_range);
             return isInRange;
         }
     }
