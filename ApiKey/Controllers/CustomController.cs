@@ -5,14 +5,11 @@ using System.Security.Principal;
 using ApiKeyPOC.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.IISIntegration;
 
 namespace ApiKeyPOC.Controllers
 {
-#if DEBUG
-    [AllowAnonymous]
-#else
     [Authorize(AuthenticationSchemes = IISDefaults.AuthenticationScheme)]
-#endif
     [Route("api/[controller]")]
     public class CustomController : Controller
     {

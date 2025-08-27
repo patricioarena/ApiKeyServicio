@@ -30,6 +30,14 @@
 		<Folder Include="Log\" CopyToPublishDirectory="Always" />
 		<Folder Include="wwwroot\" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Properties\Resources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Resources.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
 	
 <!--	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">-->
 <!--		<Exec Command="copy /Y &quot;$(SolutionDir)\ApiKey\web.$(Configuration).config&quot; &quot;$(SolutionDir)\ApiKey\web.config" />-->
@@ -42,6 +50,13 @@
 		<!--<Content Update="appsettings.Testing.json" CopyToPublishDirectory="Never" />-->
 		<!--<Content Update="appsettings.UAT.json" CopyToPublishDirectory="Never" />-->
 		<!--<Content Update="appsettings.Temp.json" CopyToPublishDirectory="Never" />-->
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Properties\Resources.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
 	</ItemGroup>
 	
 </Project>

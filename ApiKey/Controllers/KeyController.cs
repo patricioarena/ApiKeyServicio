@@ -20,11 +20,7 @@ using System.Threading.Tasks;
 
 namespace ApiKeyPOC.Controllers
 {
-#if DEBUG
-    [AllowAnonymous]
-#else
     [Authorize(AuthenticationSchemes = IISDefaults.AuthenticationScheme)]
-#endif
     [Route("api/[controller]")]
     public class KeyController : CustomController
     {

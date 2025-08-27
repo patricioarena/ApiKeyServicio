@@ -7,6 +7,7 @@ using DataAccess.Models;
 using Domain.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
@@ -14,11 +15,8 @@ using Newtonsoft.Json.Linq;
 
 namespace ApiKeyPOC.Controllers
 {
-#if DEBUG
-    [AllowAnonymous]
-#else
+
     [Authorize(AuthenticationSchemes = IISDefaults.AuthenticationScheme)]
-#endif
     [Route("api/[controller]")]
     public class ClientController : CustomController
     {
