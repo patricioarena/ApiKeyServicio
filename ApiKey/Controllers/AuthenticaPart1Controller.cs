@@ -14,11 +14,12 @@ using Newtonsoft.Json.Linq;
 namespace ApiKeyPOC.Controllers
 {
     /// <summary>
-    /// Controlador para validar la autenticación de clientes Authentica    
+    /// Controlador para validar la autenticación de clientes Authentica
+    /// usando Referer, rangos de ips y key por default.
     /// </summary>
     [AllowAnonymous]
     [Route("api/[controller]")]
-    public class AuthenticaController : CustomController
+    public partial class AuthenticaController : CustomController
     {
         private const string Referer = "Referer";
         

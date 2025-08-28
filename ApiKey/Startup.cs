@@ -1,6 +1,8 @@
 using System;
 using System.Runtime.InteropServices;
 using ApiKeyPOC.Configs;
+using ApiKey.Data;
+using ApiKey.Models;
 using Application;
 using Application.Factory;
 using Application.IFactory;
@@ -8,6 +10,8 @@ using Application.IServices;
 using Application.Services;
 using AutoMapper;
 using DataAccess.Models;
+using Microsoft.Data.Sqlite;
+using System.IO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -59,6 +63,14 @@ namespace ApiKeyPOC
             services.AddScoped<IAbstractServiceFactory, ConcreteServiceFactory>();
 
             services.AddDbContext<ApiKeyDbContext>(OptionsAction());
+            
+            // Configure SQLite for whitelist
+            services.AddDbContext<WhitelistDbContext>(options => 
+            {
+                var dbPath = Path.Combine("Resources", "whitelist.db");
+                var connectionString = $"Data Source={dbPath}";
+                options.UseSqlite(connectionString);
+            });
 
             var serviceProvider = services.BuildServiceProvider();
             var logger = serviceProvider.GetService<ILogger<Startup>>();
@@ -138,6 +150,9 @@ namespace ApiKeyPOC
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
+            // Initialize the whitelist database
+            InitializeWhitelistDatabase(app);
+            
             var Active = Configuration.GetSection("Logging:LogFile:Active").Value;
             if (Active.Equals("true"))
             {
@@ -147,7 +162,7 @@ namespace ApiKeyPOC
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                _Logger.LogInformation($"In { env.EnvironmentName } environment");
+                _Logger.LogInformation($"In {env.EnvironmentName} environment");
             }
             
             app.UseSwagger();
@@ -188,6 +203,33 @@ namespace ApiKeyPOC
             return IsDebugWithDocker()
                 ? options => options.UseSqlServer(Configuration.GetConnectionString("SQLServerDocker"))
                 : options => options.UseSqlServer(Configuration.GetConnectionString("SQLServer"));
+        }
+        
+        private void InitializeWhitelistDatabase(IApplicationBuilder app)
+        {
+            using var scope = app.ApplicationServices.GetService<IServiceScopeFactory>()?.CreateScope();
+            if (scope != null)
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var db = services.GetRequiredService<WhitelistDbContext>();
+                    // Ensure the database is created and apply any pending migrations
+                    db.Database.EnsureCreated();
+                    
+                    // Create the Resources directory if it doesn't exist
+                    var resourcesPath = Path.Combine(Directory.GetCurrentDirectory(), "Resources");
+                    if (!Directory.Exists(resourcesPath))
+                    {
+                        Directory.CreateDirectory(resourcesPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while initializing the whitelist database.");
+                }
+            }
         }
     }
 }
