@@ -1,20 +1,20 @@
 using Microsoft.EntityFrameworkCore;
-using ApiKey.Models;
+using ApiKey.Whitelist;
 
 namespace ApiKey.Data
 {
-    public class WhitelistDbContext : DbContext
+    public class WhitelistContext : DbContext
     {
-        public DbSet<WhitelistEntry> WhitelistEntries { get; set; }
+        public DbSet<EntryEntity> WhitelistEntries { get; set; }
 
-        public WhitelistDbContext(DbContextOptions<WhitelistDbContext> options)
+        public WhitelistContext(DbContextOptions<WhitelistContext> options)
             : base(options)
         {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<WhitelistEntry>()
+            modelBuilder.Entity<EntryEntity>()
                 .HasIndex(e => e.Value)
                 .IsUnique();
         }

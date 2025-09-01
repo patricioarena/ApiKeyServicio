@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using ApiKey.Data;
-using ApiKey.Models;
+using ApiKey.Whitelist;
 using ApiKeyPOC.Controllers;
 using ApiKeyPOC.Results;
 using Microsoft.AspNetCore.Mvc;
@@ -19,23 +19,23 @@ namespace ApiKey.Controllers
     [ApiController]
     public partial class AuthenticaController : CustomController
     {
-        private readonly WhitelistDbContext _context;
+        private readonly WhitelistContext _context;
 
         private readonly ILogger<AuthenticationController> _logger;
 
-        public AuthenticaController(WhitelistDbContext context, ILogger<AuthenticationController> logger)
+        public AuthenticaController(WhitelistContext context, ILogger<AuthenticationController> logger)
         {
             _context = context;
             _logger = logger;
         }
         
         [HttpGet("Whitelist/Entries/Data")]
-        public async Task<ActionResult<IEnumerable<WhitelistEntry>>> GetWhitelist()
+        public async Task<ActionResult<IEnumerable<EntryEntity>>> GetWhitelist()
         {
             try
             {
                 var whitelistEntry = await _context.WhitelistEntries.ToListAsync();
-                return Ok(new ResponseApi<IEnumerable<WhitelistEntry>>(HttpStatusCode.OK, null, whitelistEntry));
+                return Ok(new ResponseApi<IEnumerable<EntryEntity>>(HttpStatusCode.OK, null, whitelistEntry));
             }
             catch (Exception ex)
             {
@@ -45,14 +45,14 @@ namespace ApiKey.Controllers
         }
 
         [HttpGet("Whitelist/Entry/{id}")]
-        public async Task<ActionResult<WhitelistEntry>> GetWhitelistEntry(int id)
+        public async Task<ActionResult<EntryEntity>> GetWhitelistEntry(int id)
         {
             try
             {
                 var whitelistEntry = await _context.WhitelistEntries.FindAsync(id);
                 return whitelistEntry == null 
                     ? Ok(new ResponseApi<IActionResult>(HttpStatusCode.NotFound, "NotFound", null))
-                    : Ok(new ResponseApi<WhitelistEntry>(HttpStatusCode.OK, null, whitelistEntry));
+                    : Ok(new ResponseApi<EntryEntity>(HttpStatusCode.OK, null, whitelistEntry));
             }
             catch (Exception ex)
             {
@@ -62,16 +62,16 @@ namespace ApiKey.Controllers
         }
 
         [HttpPost("Whitelist/Entry")]
-        public async Task<ActionResult<WhitelistEntry>> PostWhitelistEntry(WhitelistEntryDto whitelistEntry)
+        public async Task<ActionResult<EntryEntity>> PostWhitelistEntry(EntryDto whitelistEntry)
         {
             try
             {
-                var entry = new WhitelistEntry { Value = whitelistEntry.Value, Description = whitelistEntry.Description };
+                var entry = new EntryEntity { Value = whitelistEntry.Value, Description = whitelistEntry.Description };
                 var result = _context.WhitelistEntries.Add(entry);
                 await _context.SaveChangesAsync();
 
                 CreatedAtAction(nameof(GetWhitelistEntry), new { id = result.Entity.Id }, result.Entity);
-                return Ok(new ResponseApi<WhitelistEntry>(HttpStatusCode.Created, "Created", result.Entity));      
+                return Ok(new ResponseApi<EntryEntity>(HttpStatusCode.Created, "Created", result.Entity));      
             }
             catch (Exception ex)
             {

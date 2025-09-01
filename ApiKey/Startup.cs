@@ -2,7 +2,6 @@ using System;
 using System.Runtime.InteropServices;
 using ApiKeyPOC.Configs;
 using ApiKey.Data;
-using ApiKey.Models;
 using Application;
 using Application.Factory;
 using Application.IFactory;
@@ -65,7 +64,7 @@ namespace ApiKeyPOC
             services.AddDbContext<ApiKeyDbContext>(OptionsAction());
             
             // Configure SQLite for whitelist
-            services.AddDbContext<WhitelistDbContext>(options => 
+            services.AddDbContext<WhitelistContext>(options => 
             {
                 var dbPath = Path.Combine("Resources", "whitelist.db");
                 var connectionString = $"Data Source={dbPath}";
@@ -213,7 +212,7 @@ namespace ApiKeyPOC
                 var services = scope.ServiceProvider;
                 try
                 {
-                    var db = services.GetRequiredService<WhitelistDbContext>();
+                    var db = services.GetRequiredService<WhitelistContext>();
                     // Ensure the database is created and apply any pending migrations
                     db.Database.EnsureCreated();
                     
